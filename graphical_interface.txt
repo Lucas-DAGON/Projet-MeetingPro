@@ -1,0 +1,23 @@
+Voici les fonctionnalités principales attendues :
+    - Ajouter un nouveau client
+    - Ajouter une nouvelle salle
+    - Afficher les salles réservables
+    - Afficher les réservations pour un client
+    - Identifier si une salle est disponible sur un créneau
+    - Afficher les salles disponibles pour un créneau
+    - Réserver une salle
+
+Pour réserver une salle, le parcours client est le suivant :
+    - Le client choisi son créneau
+    - Les salles disponibles lui sont proposées
+    - Le client choisi sa salle
+    - La réservation est effectuée
+
+Le programme doit avoir un menu principal comportant les onglets suivants :
+    1. Ajouter un nouveau client
+    2. Ajouter une nouvelle salle
+    3. Afficher les salles réservables
+    4. Afficher les réservations pour un client
+    5. Identifier si une salle est disponible sur un créneau
+    6. Afficher les salles disponibles pour un créneau
+    7. Réserver une salle
