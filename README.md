@@ -37,3 +37,5 @@ Toutes héritent de la classe `Standard`.
     | +tropPeuDeMonde(n): bool |           |                      |
     +--------------------------+           +----------------------+
 ```
+
+
