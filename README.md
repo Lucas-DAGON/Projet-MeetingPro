@@ -19,11 +19,11 @@ Toutes héritent de la classe `Standard`.
             +--------------------------------------+
             | - nom: String                        |
             | - nbPlaces: int                      |
-            | - debut: DateTime                    |
-            | - fin: DateTime                      |
             +--------------------------------------+
             | +tropDePersonnes(n: int): bool       |
             | +dureeReservationValide(): bool      |
+            | +estDisponible(): bool               |
+            | +disponibleAPartirDe(): int List[5]  |
             +--------------------------------------+
                                 ^
                                 |
@@ -32,7 +32,7 @@ Toutes héritent de la classe `Standard`.
     +--------------------------+           +----------------------+
     |        Conférence        |           |   Informatique       |
     +--------------------------+           +----------------------+
-    |                          |           | - avecPC: bool       |
+    |                          |           | - equipement : str   |
     +--------------------------+           +----------------------+
     | +tropPeuDeMonde(n): bool |           |                      |
     +--------------------------+           +----------------------+
