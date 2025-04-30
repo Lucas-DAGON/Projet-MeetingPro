@@ -80,3 +80,11 @@ class Standard:
         """
         # Placeholder logic for available starting time
         return [0, 9, 1, 1, 2025]
+    
+    def return_type(self) -> str:
+        """
+        Return the type of the meeting room.
+
+        :return: String representing the type of the meeting room.
+        """
+        return "Standard"
