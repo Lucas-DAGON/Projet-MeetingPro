@@ -14,6 +14,11 @@ from json import loads, JSONDecodeError
 from typing import List
 from os import path
 from pathlib import Path
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Define the Person class
 class Person:
@@ -29,7 +34,7 @@ class Person:
             raise ValueError("ID generation failed")
         # save the person in a json file named after the id
         # the file is stored in the relative path ../../persons/
-        self.file_path = path.join(Path(__file__).parent.parent, 'persons', f'{self.id}.json')
+        self.file_path = path.join(Path(__file__).parent.parent.parent, 'persons', f'{self.id}.json')
         self.save_to_file()
 
     def add_reservation(self, reservation):
@@ -62,8 +67,19 @@ class Person:
             "reservations": [res.__dict__ for res in self.reservations],
             "id": self.id
         }
-        with open(self.file_path, 'w') as f:
-            f.write(str(data))
+        logger.debug(f"Saving person data to {Path(self.file_path)}")
+        # if the file does not exist, we will create it
+        if not path.exists(self.file_path):
+            with open(self.file_path, 'w') as f:
+                f.write(str(data))
+        else:
+            # if the file exists, we will update it
+            with open(self.file_path, 'r+') as f:
+                f.seek(0)
+                f.write(str(data))
+        # close the file
+        logger.debug(f"Person data saved to {Path(self.file_path)}")
+        f.close()
 
     # Alternative constructor for creating a person from a json file
     @classmethod
