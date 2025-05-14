@@ -54,6 +54,11 @@ class Person:
         # save the person in a json file named after the id
         # the file is stored in the relative path ../../persons/
         self.file_path = path.join(Path(__file__).parent.parent.parent, 'persons', f'{self.id}.json')
+        # Check if the file already exists
+        if path.exists(self.file_path):
+            # If it's the case, it means the person already exists
+            # We will therefore raise an error
+            raise ValueError("This person already exists.")
         self.save_to_file()
 
     def add_reservation(self, reservation_data: List):
@@ -85,7 +90,6 @@ class Person:
         logger.debug("Réservations après ajout : %s", self.reservations)
         self.save_to_file()
 
-    
     def remove_reservation(self, reservation_data: List):
         if len(reservation_data) != 11:
             raise ValueError("La réservation doit contenir exactement 11 éléments")
@@ -117,8 +121,6 @@ class Person:
 
         raise ValueError("Réservation non trouvée")
 
-
-        
     def get_reservations(self):
         return self.reservations
     
@@ -159,10 +161,13 @@ class Person:
             "id": self.id
         }
         logger.debug(f"Saving person data to {Path(self.file_path)}")
-        # if the file does not exist, we will create it
+        # if the path and/or the file does not exist, we will create it
         if not path.exists(self.file_path):
+            # create the directory if it does not exist
+            Path(self.file_path).parent.mkdir(parents=True, exist_ok=True)
+            # create the file
             with open(self.file_path, 'w') as f:
-                f.write(dumps(data))
+                f.write(dumps(data))            
         else:
             # if the file exists, we will update it
             with open(self.file_path, 'r+') as f:
@@ -176,7 +181,7 @@ class Person:
     @classmethod
     def from_json(cls, json_data):
         try:
-            print(json_data)
+            logging.debug(f"Loading person data from json: {json_data}")
             # Load the json data
             # We will use the dumps method to convert the json data to a string
             data = loads(json_data)
@@ -185,6 +190,7 @@ class Person:
             email = data.get('email')
             person = cls(firstname, sirname, email)
             person.reservations = data.get('reservations', [])
+            person.id = data.get('id')
             return person
         except JSONDecodeError:
             raise ValueError("Invalid JSON data")
