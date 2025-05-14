@@ -17,7 +17,7 @@ from pathlib import Path
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARNING)
 
 
 class Standard:
@@ -106,8 +106,14 @@ class Standard:
         :param bloc: Dictionary containing reservation details. Keys are the date in format "dd/mm/yyyy" and values are a list with 4 entries: [start_hour, start_minute, end_hour, end_minute].
         :return: True if the reservation was removed, False otherwise.
         """
-        if bloc in self.reservations:
-            self.reservations.remove(bloc)
+        date = list(bloc.keys())[0]
+        times = bloc[date]
+
+        if date in self.reservations and times in self.reservations[date]:
+            self.reservations[date].remove(times)
+            # Remove the key if there are no more reservations for that date
+            if not self.reservations[date]:
+                del self.reservations[date]
             self.save_to_json()
             logging.info(f"Reservation removed for {self.name}: {bloc}")
             return True
@@ -175,14 +181,59 @@ class Standard:
 
 
 if __name__ == "__main__":
-    # Example usage
-    room = Standard("Conference Room", 10)
-    print(room)
-    print("nothing")
-    print(room.is_available([0, 9, 1, 1, 2025], [30, 10, 1, 1, 2025]))
-    logging.info("Room saved to JSON file.")
-    del room
-    room = Standard.load_from_json("Conference Room")
-    logging.info("Room loaded from JSON file.")
-    print(room)
-    for i in range(1000):
+    print("\n=== TESTS DE LA CLASSE STANDARD ===")
+
+    # Test 1 : Création d'une salle Standard
+    print("Test 1 : Création de salle")
+    salle = Standard("TestRoom", capacity=6)
+    print(salle)
+
+    # Test 2 : Test de la méthode too_small
+    print("Test 2 : Capacité insuffisante ?")
+    print("5 personnes :", salle.too_small(5))  # False
+    print("10 personnes :", salle.too_small(10))  # True
+
+    # Test 3 : Test de durée de réservation
+    print("Test 3 : Durée de réservation valide ?")
+    print("15 minutes :", salle.reservation_duration_valid(15))  # False
+    print("45 minutes :", salle.reservation_duration_valid(45))  # True
+
+    # Test 4 : Ajout d'une réservation
+    print("Test 4 : Ajout d'une réservation")
+    bloc1 = {"14/05/2025": [10, 0, 11, 0]}
+    salle.add_reservation(bloc1)
+    print("Réservations :", salle.get_reservations())
+
+    # Test 5 : Ajout d'une autre réservation le même jour
+    print("Test 5 : Ajout deuxième réservation le même jour")
+    bloc2 = {"14/05/2025": [9, 0, 9, 30]}
+    salle.add_reservation(bloc2)
+    print("Réservations après tri :", salle.get_reservations())
+
+    # Test 6 : Suppression d'une réservation existante
+    print("Test 6 : Suppression réservation existante")
+    success = salle.remove_reservation(bloc1)
+    print("Suppression réussie :", success)
+    print("Réservations après suppression :", salle.get_reservations())
+
+    # Test 7 : Suppression d'une réservation inexistante
+    print("Test 7 : Suppression réservation inexistante")
+    bloc3 = {"15/05/2025": [15, 0, 16, 0]}
+    success = salle.remove_reservation(bloc3)
+    print("Suppression échouée :", not success)
+
+    # Test 8 : Chargement de la salle depuis le fichier JSON
+    print("Test 8 : Chargement depuis fichier JSON")
+    salle_chargee = Standard.load_from_json("TestRoom")
+    print("Salle chargée :", salle_chargee)
+    print("Réservations chargées :", salle_chargee.get_reservations())
+
+    print("Test 9 : Suppression répétée de la même réservation")
+    bloc3 = {"14/05/2025": [9, 0, 9, 30]}
+    success1 = salle.remove_reservation(bloc3)
+    success2 = salle.remove_reservation(bloc3)
+    print("1ère suppression (doit réussir) :", success1)
+    print("2ème suppression : attendue = False, obtenue =", success2)
+    print("Réservations restantes :", salle.get_reservations())
+
+    print("=== FIN DES TESTS ===\n")
