@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import ttk
-from src.calendar_logic.person import Person
+from src.person_logic.person import Person
 import os
 import sys
 
