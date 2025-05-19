@@ -1,9 +1,9 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import ttk
-from src.calendar_logic.person import Person
 import os
 import sys
+from src.gui.adding.new_person import Add_Client
 
 
 class Login_Account:
@@ -67,7 +67,7 @@ class Login_Account:
 
 
 
-class Create_Account:
+class Add_Window:
     """This class creates a new account for the user."""
     fullscreenstate = False
 
@@ -84,15 +84,14 @@ class Create_Account:
         self.background_image()
 
         self.frame = ttk.Frame(self.master)
-        self.create_account = ttk.Button(self.frame, text = 'create an account', width = 25, command = self.create).grid(row=0, column=0, padx=10, pady=10)
+        self.add_new_account = ttk.Button(self.frame, text = 'Ajouter un nouveau client', width = 25, command = self.create_employee_window).grid(row=0, column=0, padx=10, pady=10)
         self.button_quit = ttk.Button(self.frame, text = 'Quit', width = 20, command = self.close_windows).grid(row=1, column=0, padx=10, pady=10)
         self.frame.pack()
         
-    def create(self):
+    def create_employee_window(self):
         # Test the person class
-        person = Person("John Doe", "jone_doe@uha.fr")
-        print(person)
-        self.close_windows()
+        self.newWindow = tk.Toplevel(self.master)
+        self.app = Add_Client(self.newWindow)
 
     def close_windows(self):
         self.master.destroy()

@@ -2,67 +2,50 @@
 # -*- coding: utf-8 -*-
 ###########################################################################################
 # Project: MeetingPro
-# File: main_window.py
+# File: new_person.py
 ###########################################################################################
-# Creation Date: 23-04-2025
+# Creation Date: 19-05-2025
 # Authors: Lucas DAGON
 # Description: This script creates the main window that can open all other windows.
 ###########################################################################################
+
 
 import tkinter as tk
 import os
 import sys
 from PIL import Image, ImageTk
 from tkinter import ttk
-# Debuging
-if __name__ == "__main__":
-    from gui.account_manager import Login_Account, Add_Window
-    from create_calendar import Create_Calendar
-else:
-    from src.gui.account_manager import Login_Account, Add_Window
-    from src.gui.create_calendar import Create_Calendar
+from src.calendar_logic.person import Person
 
 
-
-
-
-class Main_Window:
-    """ Creates the main window of the application. """
+class Add_Client:
+    """ This class creates the window to add a new employee. """
     fullscreenstate = False
+    
     def __init__(self, master):
         self.master = master
-        
         self.master.grid()
         self.master.config(bg='black')
-        self.master.title("test")
+        self.master.title("Ajouter un client")
         self.master.geometry('1920x1080')
         self.master.resizable(1,1)
         self.master.bind("<F11>", self.toggle_fullscreen)
         self.master.bind("<Escape>", self.end_fullscreen)
 
         self.background_image()
-        
+
         self.frame = ttk.Frame(self.master)
-        self.button_add_employee = ttk.Button(self.frame, text = 'Ajouter', width = 20, command = self.create_account_window).grid(row=5, column=0, padx=10, pady=10)
-        self.button_reserve = ttk.Button(self.frame, text = 'Open Calendar', width = 20, command = self.open_calendar).grid(row=6, column=0, padx=10, pady=10)
-        self.button_quit = ttk.Button(self.frame, text = 'Quit', width = 20, command = self.close_windows).grid(row=7, column=0, padx=10, pady=10)
+        self.surname = tk.Text(self.frame, height=1, width=10).grid(row=0, column=0, padx=10, pady=10)
+        self.name = tk.Text(self.frame, height=1, width=10).grid(row=1, column=0, padx=10, pady=10)
+        self.email = tk.Text(self.frame, height=1, width=10).grid(row=2, column=0, padx=10, pady=10)
+        self.add_new_account = ttk.Button(self.frame, text = 'Ajouter un nouveau client', width = 25, command = self.create_client).grid(row=3, column=1, padx=10, pady=10)
         self.frame.pack()
 
-    def open_calendar(self):
-        self.newWindow = tk.Toplevel(self.master)
-        self.app = Create_Calendar(self.newWindow)
-
-    def login_window(self):
-        self.newWindow = tk.Toplevel(self.master)
-        self.app = Login_Account(self.newWindow)
-
-    def create_account_window(self):
-        self.newWindow = tk.Toplevel(self.master)
-        self.app = Add_Window(self.newWindow)
+    def create_client(self):
+        print(f"Creating {self.surname} {self.name} with {self.email} as his email.")
 
     def background_image(self)-> None:
-        """This function creates the background image of the gui."""
-        #BG base path
+        #BG image
         os.chdir(sys.path[0])
 
         # Change the path to the background image
@@ -80,9 +63,6 @@ class Main_Window:
         self.image_label = tk.Label(self.master, image = self.image)
         self.image_label.place(x = 0, y = 0)
 
-    def close_windows(self):
-        self.master.destroy()
-
     def toggle_fullscreen(self, event=None):
         self.fullscreenstate = not self.fullscreenstate  # Just toggling the boolean
         self.master.attributes("-fullscreen", self.fullscreenstate)
@@ -92,14 +72,3 @@ class Main_Window:
         self.fullscreenstate = False
         self.master.attributes("-fullscreen", False)
         return "break"
-   
-
-
-
-def main(): 
-    root = tk.Tk()
-    app = Main_Window(root)
-    root.mainloop()
-
-if __name__ == '__main__':
-    main()

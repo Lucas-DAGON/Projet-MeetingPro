@@ -17,7 +17,7 @@ from pathlib import Path
 import logging
 import hmac
 import hashlib
-from verify_overlapping import check_overlap_lists
+from src.calendar_logic.verify_overlapping import check_overlap_lists
 
 # Todo:
 # - Discuss if we should implement a secret key or leave it like this
