@@ -194,7 +194,8 @@ cython_debug/
 *.synctex.gz
 *.toc
 *.vrb
-
+*.run.xml
+*.bcf
 
 # Dossiers générés
 _build/
