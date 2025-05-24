@@ -10,7 +10,6 @@
 #################################################################
 
 # Import necessary modules
-from typing import List
 from json import dumps, load
 from os import path
 from pathlib import Path
@@ -31,8 +30,10 @@ class Standard:
         self.name = name
         self.capacity = capacity
         self.reservations = reservations  # Dictionary to hold reservations
-        self.file_path = path.join(Path(__file__).parent.parent.parent, 'room', f'{self.name}.json') # Path to the JSON file for saving room data
-        self.save_to_json() # Save the room to a JSON file upon initialization
+        self.file_path = path.join(
+            Path(__file__).parent.parent.parent, "room", f"{self.name}.json"
+        )  # Path to the JSON file for saving room data
+        self.save_to_file()  # Save the room to a JSON file upon initialization
 
     def __str__(self):
         """
@@ -94,7 +95,7 @@ class Standard:
         self.reservations[date].sort(
             key=lambda x: (x[0], x[1])
         )  # Sort by start hour and minute
-        self.save_to_json()
+        self.save_to_file()
         logging.info(
             f"Reservation added for {self.name} on {bloc}: {self.reservations}"
         )
@@ -114,7 +115,7 @@ class Standard:
             # Remove the key if there are no more reservations for that date
             if not self.reservations[date]:
                 del self.reservations[date]
-            self.save_to_json()
+            self.save_to_file()
             logging.info(f"Reservation removed for {self.name}: {bloc}")
             return True
         else:
@@ -129,7 +130,7 @@ class Standard:
         """
         return self.reservations
 
-    def save_to_json(self) -> None:
+    def save_to_file(self) -> None:
         """
         Save the meeting room to a JSON file.
 

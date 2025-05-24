@@ -15,7 +15,7 @@ import os
 import sys
 from PIL import Image, ImageTk
 from tkinter import ttk
-from src.calendar_logic.person import Person
+from src.controller.add_client import add_client
 
 
 class Add_Client:
@@ -35,14 +35,27 @@ class Add_Client:
         self.background_image()
 
         self.frame = ttk.Frame(self.master)
-        self.surname = tk.Text(self.frame, height=1, width=10).grid(row=0, column=0, padx=10, pady=10)
-        self.name = tk.Text(self.frame, height=1, width=10).grid(row=1, column=0, padx=10, pady=10)
-        self.email = tk.Text(self.frame, height=1, width=10).grid(row=2, column=0, padx=10, pady=10)
-        self.add_new_account = ttk.Button(self.frame, text = 'Ajouter un nouveau client', width = 25, command = self.create_client).grid(row=3, column=1, padx=10, pady=10)
+        self.text_box_surname = tk.Text(self.frame, width=1, height=10, relief='groove', wrap='word', borderwidth=5)
+        self.text_box_surname.grid(row=0, column=0, padx=10, pady=10)
+        self.text_box_name = tk.Text(self.frame, height=1, width=10)
+        self.text_box_name.grid(row=1, column=0, padx=10, pady=10)
+        self.text_box_email = tk.Text(self.frame, height=1, width=10)
+        self.text_box_email.grid(row=2, column=0, padx=10, pady=10)
+        self.add_new_client = ttk.Button(self.frame, text='Ajouter un nouveau client', width=25, command=self.create_client)
+        self.add_new_client.grid(row=3, column=1, padx=10, pady=10)
         self.frame.pack()
 
     def create_client(self):
-        print(f"Creating {self.surname} {self.name} with {self.email} as his email.")
+        self.get_strings()
+        print(f"Creating client with name: {self.name}, surname: {self.surname}, email: {self.email}")
+
+    def get_strings(self):
+        self.surname = self.text_box_surname.get("1.0", "end-1c")
+        self.name = self.text_box_name.get("1.0", "end-1c")
+        self.email = self.text_box_email.get("1.0", "end-1c")
+        print(self.surname)
+        print(self.name)
+        print(self.email)
 
     def background_image(self)-> None:
         #BG image

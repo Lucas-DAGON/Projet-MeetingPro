@@ -17,15 +17,16 @@ from pathlib import Path
 import logging
 import hmac
 import hashlib
-from src.calendar_logic.verify_overlapping import check_overlap_lists
+from src.person_logic.verify_overlapping import check_overlap_lists
 
 # Todo:
 # - Discuss if we should implement a secret key or leave it like this
-SecretKey = "secret_key".encode('utf-8')
+SecretKey = "secret_key".encode("utf-8")
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
+
 
 # Define the Person class
 class Person:
@@ -36,9 +37,9 @@ class Person:
         self.email = email
         # Check for void_person
         if self.name == " " and self.email == "":
-            # If we have a we will give it a "" id to avoid errors by printing
+            # If we have a we will give it a "" id to avoid errors by printing
             self.id = ""
-            # We will not save the person to a file
+            # We will not save the person to a file
             logger.debug("Creating a void person")
             return
         # Check if the email is valid
@@ -55,7 +56,9 @@ class Person:
         logger.debug(f"Name: {self.name}, Email: {self.email}, ID: {self.id}")
         # save the person in a json file named after the id
         # the file is stored in the relative path ../../persons/
-        self.file_path = path.join(Path(__file__).parent.parent.parent, 'persons', f'{self.id}.json')
+        self.file_path = path.join(
+            Path(__file__).parent.parent.parent, "persons", f"{self.id}.json"
+        )
         # Check if the file already exists
         if path.exists(self.file_path):
             # If it's the case, it means the person already exists
@@ -124,9 +127,9 @@ class Person:
 
     def get_reservations(self):
         return self.reservations
-    
+
     def id_generator(self):
-        """ 
+        """
         Generate a unique id for the person
         The name and email are used to generate a unique id
         """
@@ -139,19 +142,19 @@ class Person:
         else:
             # The idea is to use the name and email to generate the id and to find the person,
             # but at the same time not be able with the id alone to find the person
-            data = f"{self.name}{self.email}".encode('utf-8')
+            data = f"{self.name}{self.email}".encode("utf-8")
             # Generate a hash of the data using HMAC and SHA256
             h = hmac.new(SecretKey, data, hashlib.sha256)
             # Convert the hash to a hexadecimal string
             self.id = h.hexdigest()
         return
-    
+
     def __str__(self):
         return f"Person(name={self.name}, email={self.email}, id={self.id})"
-    
+
     def __repr__(self):
         return f"Person(name={self.name}, email={self.email}, id={self.id})"
-    
+
     def save_to_file(self):
         data = {
             "firstname": self.firstname,
@@ -159,7 +162,7 @@ class Person:
             "name": self.name,
             "email": self.email,
             "reservations": self.reservations,
-            "id": self.id
+            "id": self.id,
         }
         logger.debug(f"Saving person data to {Path(self.file_path)}")
         # if the path and/or the file does not exist, we will create it
@@ -167,11 +170,11 @@ class Person:
             # create the directory if it does not exist
             Path(self.file_path).parent.mkdir(parents=True, exist_ok=True)
             # create the file
-            with open(self.file_path, 'w') as f:
-                f.write(dumps(data))            
+            with open(self.file_path, "w") as f:
+                f.write(dumps(data))
         else:
             # if the file exists, we will update it
-            with open(self.file_path, 'r+') as f:
+            with open(self.file_path, "r+") as f:
                 f.seek(0)
                 f.write(dumps(data))
         # close the file
@@ -184,14 +187,14 @@ class Person:
         try:
             logging.debug(f"Loading person data from json: {json_data}")
             # Load the json data
-            # We will use the dumps method to convert the json data to a string
+            # We will use the dumps method to convert the json data to a string
             data = loads(json_data)
-            firstname = data.get('firstname')
-            sirname = data.get('sirname')
-            email = data.get('email')
+            firstname = data.get("firstname")
+            sirname = data.get("sirname")
+            email = data.get("email")
             person = cls(firstname, sirname, email)
-            person.reservations = data.get('reservations', [])
-            person.id = data.get('id')
+            person.reservations = data.get("reservations", [])
+            person.id = data.get("id")
             return person
         except JSONDecodeError:
             raise ValueError("Invalid JSON data")
@@ -207,13 +210,15 @@ class Person:
     @classmethod
     def from_search(cls, ID: str):
         # Check if the file exists
-        file_path = path.join(Path(__file__).parent.parent.parent, 'persons', f'{ID}.json')
+        file_path = path.join(
+            Path(__file__).parent.parent.parent, "persons", f"{ID}.json"
+        )
         if not path.exists(file_path):
             # If the file does not exist, we will return a void person
             logger.debug(f"File {file_path} does not exist")
             return cls.void_person()
         # Read the file
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = f.read()
         # Create a person from the json data
         logger.debug(f"json data: {data}")
