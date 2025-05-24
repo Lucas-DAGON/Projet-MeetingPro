@@ -10,7 +10,7 @@
 #################################################################
 
 # Import necessary modules
-from conference import Conference
+from src.room_logic.conference import Conference
 
 class ComputerRoom(Conference):
     def __init__(self, name:str, capacity:int = 4):
