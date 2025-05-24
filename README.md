@@ -39,3 +39,4 @@ Toutes héritent de la classe `Standard`.
 ```
 
 
+--> Client indécit

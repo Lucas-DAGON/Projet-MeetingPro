@@ -1,3 +1,3 @@
-from standard import Standard
-from conference import Conference
-from computer_room import ComputerRoom
+from src.room_logic.standard import Standard
+from src.room_logic.conference import Conference
+from src.room_logic.computer import ComputerRoom

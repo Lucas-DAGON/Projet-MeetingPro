@@ -10,10 +10,15 @@
 #################################################################
 
 # Import necessary modules
+import tkinter as tk
+from src.gui.main_gui import Main_Window
 import os
 import sys
-import logging
-import time
-import datetime
-import json
-import tkinter as tk
+
+def main():
+    root = tk.Tk()
+    app = Main_Window(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
