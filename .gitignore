@@ -174,5 +174,5 @@ cython_debug/
 .pypirc
 
 # json files
-persons
-room
+persons/*.json
+room/*.json
