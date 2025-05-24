@@ -10,9 +10,9 @@
 #################################################################
 
 # Import necessary modules
-from conference import Conference
+from conference import Standard
 
-class ComputerRoom(Conference):
+class ComputerRoom(Standard):
     def __init__(self, name:str, capacity:int = 4):
         """
         Initialize a computer meeting room.
@@ -51,6 +51,6 @@ class ComputerRoom(Conference):
         """
         Return the type of the meeting room.
 
-        :return: Type of the meeting room.
+        :return: String of the type of the meeting room.
         """
         return "Computer Room"

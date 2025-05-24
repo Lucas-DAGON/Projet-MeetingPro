@@ -1,0 +1,56 @@
+% filepath: /home/theodoros/Vidéos/Room_Projet_POO/Projet-MeetingPro/rapport/main.tex
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{csquotes}
+\usepackage{biblatex} %Imports biblatex package
+\addbibresource{project.bib} %Import the bibliography file
+\geometry{margin=2.5cm}
+
+\title{Rapport TP programmation orientée objet: Project MeetingPro}
+\author{
+  GRIMM-{}-KEMPF Matthieu\\
+  \and
+  DAGON Lucas
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Résumé du rapport. Présentez brièvement le sujet, les objectifs et les résultats principaux.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Méthodologie}
+Au début du projet, nous avons commencé par discuter de notre vision du programme. Cette étape nous a semblée essencielle afin de s'assurer d'une bonne coordination. Nous somme tombés d'accord sur une répartition du travail front- et backend comme il est commun de le faire pour le dévellopement web et la gestion de base de données.\\
+Cette décision allait de plus dans le sens de la méthode conseillée du "MVC" (Model, View, Controller). Le fontend sert de View pour l'utilisateur gérant les intération Homme-machine et le backend lui offre le modèle ainsi que le Controller sous forme de fonctions à appeler par le Viewer.\\
+
+Après la séparation des tâches il fut temps de se décider pour la structure du projet (celle-ci sera présentée en plus amples détails dans le chapitre suivant ~\ref{fonction_sys}) et les librairies à utiliser en conséquence. Pour l'interface graphique nous n'avons pas eu le choix il falut utiliser la bibliothèque Tkinter \cite{python_tk}.\\
+Pour le système de sauvegarde une résolution à partir de fichier json. La solution indiquée était de lire et travailler dans un fichier unique nous nous en sommes cependant, pour des facilitées de modèle, éloignés pour choisir un système de fichiers multiples. Nous espérions par là également gagner sur notre utilisation de la RAM malgré une perte de vitesse générale de notre programme dans le cas où l'on possèderait un grand nombre de salles.
+Pour la lecture et ecriture des fichiers json nous nous sommes donc décidés, comme proposé dans le sujet, pour la bibliothèque standard json \cite{python_json} de python.
+
+\section{Fonctionnement du système} \label{fonction_sys}
+Décrivez les travaux existants, les solutions similaires et les références importantes.
+
+\section{Difficultées rencontrées}
+Expliquez le projet, ses fonctionnalités principales, et son architecture.
+
+\section{Résultats}
+Décrivez la démarche suivie, les outils utilisés, et les choix techniques.
+
+\section*{Références}
+\nocite{*}
+\printbibliography
+% \bibliographystyle{plain}
+% \bibliography{bibliographie}
+\end{document}

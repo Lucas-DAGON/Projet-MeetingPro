@@ -11,7 +11,6 @@
 
 # Import necessary modules
 from json import JSONDecodeError, dumps, loads
-from typing import List
 from os import path
 from pathlib import Path
 import logging
@@ -63,7 +62,7 @@ class Person:
         if path.exists(self.file_path):
             # If it's the case, it means the person already exists
             # We will therefore raise an error
-            raise ValueError("This person already exists.")
+            raise ValueError("This person already exists or the id is not unique.")
         self.save_to_file()
 
     def add_reservation(self, reservation_data: dict):
