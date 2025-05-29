@@ -65,7 +65,13 @@ class Person:
             raise ValueError("This person already exists or the id is not unique.")
         self.save_to_file()
 
-    def add_reservation(self, reservation_data: dict):
+    def add_reservation(self, reservation_data: dict) -> None:
+        """
+        Add a reservation to the person
+
+        :param reservation_data: dict
+        :return: None
+        """
         # The reservation_data should be a dictionary with a single entry and the key beeing the date "YYYY-MM-DD"
         # and the values being a list of lists containing the start and end time in the format [h_start,m_start,h_end,m_end]
         # and second element being the room name
@@ -106,7 +112,13 @@ class Person:
         logger.debug("Réservations après ajout : %s", self.reservations)
         self.save_to_file()
 
-    def remove_reservation(self, reservation_data: dict):
+    def remove_reservation(self, reservation_data: dict) -> None:
+        """
+        Remove a reservation from the person
+
+        :param reservation_data: dict
+        :return: None
+        """
         # The reservation_data should be a dictionary with a single entry and the key beeing the date "YYYY-MM-DD"
         # and the values being a list of lists containing the start and end time in the format [h_start,m_start,h_end,m_end]
         # and second element being the room name
@@ -124,13 +136,20 @@ class Person:
         self.save_to_file()
         return
 
-    def get_reservations(self):
+    def get_reservations(self) -> dict:
+        """
+        Get the reservations for the person
+
+        :return: dict
+        """
         return self.reservations
 
-    def id_generator(self):
+    def id_generator(self) -> None:
         """
         Generate a unique id for the person
         The name and email are used to generate a unique id
+
+        :return: None
         """
         if self.name is None or self.email is None:
             raise ValueError("Name and email must be set before generating an id")
@@ -148,13 +167,19 @@ class Person:
             self.id = h.hexdigest()
         return
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Person(name={self.name}, email={self.email}, id={self.id})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Person(name={self.name}, email={self.email}, id={self.id})"
 
-    def save_to_file(self):
+    def save_to_file(self) -> None:
+        """
+        Save the person to a json file
+        The file is stored in the relative path ../../persons/
+
+        :return: None
+        """
         data = {
             "firstname": self.firstname,
             "sirname": self.sirname,
@@ -182,7 +207,13 @@ class Person:
 
     # Alternative constructor for creating a person from a json file
     @classmethod
-    def from_save(cls, json_data):
+    def from_save(cls, json_data) -> "Person":
+        """
+        Create a person from a json file
+
+        :param json_data: json data
+        :return: Person object
+        """
         try:
             logging.debug(f"Loading person data from json: {json_data}")
             # Load the json data
@@ -200,14 +231,25 @@ class Person:
 
     # Alternative constructor for void person (unknown person)
     @classmethod
-    def void_person(cls):
+    def void_person(cls) -> "Person":
+        """
+        Create a void person (unknown person)
+
+        :return: Person object
+        """
         # Create a void person with empty name and email
         # This person will not be saved to a file
         return cls("", "", "")
 
     # Alternative constructor for creating a person from a search for a person
     @classmethod
-    def from_search(cls, ID: str):
+    def from_search(cls, ID: str) -> "Person":
+        """
+        Create a person from a search for a person
+
+        :param ID: id of the person
+        :return: Person object
+        """
         # Check if the file exists
         file_path = path.join(
             Path(__file__).parent.parent.parent, "persons", f"{ID}.json"

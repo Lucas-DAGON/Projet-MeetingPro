@@ -1,4 +1,3 @@
-% filepath: /home/theodoros/Vidéos/Room_Projet_POO/Projet-MeetingPro/rapport/main.tex
 \documentclass[a4paper,12pt]{article}
 
 \usepackage[utf8]{inputenc}
@@ -8,14 +7,17 @@
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{csquotes}
-\usepackage{biblatex} %Imports biblatex package
-\addbibresource{project.bib} %Import the bibliography file
+\usepackage{hhline}
+\usepackage{biblatex} % Imports biblatex package
+\addbibresource{project.bib} % Import the bibliography file
 \geometry{margin=2.5cm}
+\DeclareUnicodeCharacter{0302}{\^{} }
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
 
-\title{Rapport TP programmation orientée objet: Project MeetingPro}
+\title{Rapport TP Programmation Orient\'ee Objet : Projet MeetingPro}
 \author{
-  GRIMM-{}-KEMPF Matthieu\\
-  \and
+  GRIMM-KEMPF Matthieu \\
   DAGON Lucas
 }
 \date{\today}
@@ -25,32 +27,189 @@
 \maketitle
 
 \begin{abstract}
-Résumé du rapport. Présentez brièvement le sujet, les objectifs et les résultats principaux.
+    Ce rapport pr\'esente le d\'eveloppement du projet MeetingPro, r\'ealis\'e dans le cadre du cours de Programmation Orient\'ee Objet. Nous y exposons la d\'emarche de conception, les choix techniques effectu\'es, ainsi que les difficult\'es rencontr\'ees et les r\'esultats obtenus.
 \end{abstract}
 
 \tableofcontents
 \newpage
 
-\section{Méthodologie}
-Au début du projet, nous avons commencé par discuter de notre vision du programme. Cette étape nous a semblée essencielle afin de s'assurer d'une bonne coordination. Nous somme tombés d'accord sur une répartition du travail front- et backend comme il est commun de le faire pour le dévellopement web et la gestion de base de données.\\
-Cette décision allait de plus dans le sens de la méthode conseillée du "MVC" (Model, View, Controller). Le fontend sert de View pour l'utilisateur gérant les intération Homme-machine et le backend lui offre le modèle ainsi que le Controller sous forme de fonctions à appeler par le Viewer.\\
+\section{M\'ethodologie}
 
-Après la séparation des tâches il fut temps de se décider pour la structure du projet (celle-ci sera présentée en plus amples détails dans le chapitre suivant ~\ref{fonction_sys}) et les librairies à utiliser en conséquence. Pour l'interface graphique nous n'avons pas eu le choix il falut utiliser la bibliothèque Tkinter \cite{python_tk}.\\
-Pour le système de sauvegarde une résolution à partir de fichier json. La solution indiquée était de lire et travailler dans un fichier unique nous nous en sommes cependant, pour des facilitées de modèle, éloignés pour choisir un système de fichiers multiples. Nous espérions par là également gagner sur notre utilisation de la RAM malgré une perte de vitesse générale de notre programme dans le cas où l'on possèderait un grand nombre de salles.
-Pour la lecture et ecriture des fichiers json nous nous sommes donc décidés, comme proposé dans le sujet, pour la bibliothèque standard json \cite{python_json} de python.
+Le développement de notre application s’est appuyé sur une approche structurée et itérative, suivant les grands principes de la programmation orientée objet ainsi que du modèle MVC (Modèle-Vue-Contrôleur). Dès le début du projet, nous avons discuté afin de définir clairement la vision globale de l'application, son périmètre fonctionnel ainsi que la manière de répartir les responsabilités entre les membres de l'équipe.
 
-\section{Fonctionnement du système} \label{fonction_sys}
-Décrivez les travaux existants, les solutions similaires et les références importantes.
 
-\section{Difficultées rencontrées}
-Expliquez le projet, ses fonctionnalités principales, et son architecture.
+\subsection*{Répartition des rôles}
+Nous avons opté pour une séparation logique entre le \textbf{frontend} (interface graphique et interactions utilisateur) et le \textbf{backend} (gestion des données et logique métier). Cette division du travail permettait de travailler en parallèle tout en limitant les conflits, et favorisait également une architecture propre et maintenable.
 
-\section{Résultats}
-Décrivez la démarche suivie, les outils utilisés, et les choix techniques.
+\subsection*{Choix techniques}
+Concernant l'interface graphique, le cahier des charges imposait l'utilisation de la bibliothèque \textbf{Tkinter} \cite{python_tk}, qui, bien que rudimentaire, offre suffisamment de fonctionnalités pour réaliser une interface fonctionnelle. Pour la persistance des données, nous avons opté pour un système de fichiers au format \textbf{JSON} afin de sauvegarder les états des utilisateurs et des salles. Bien que le sujet préconisait un fichier unique, nous avons préféré adopter une approche à fichiers multiples, chaque entité ayant son propre fichier. Cette solution nous semblait plus adaptée à la sérialisation d’objets, et permettait une meilleure évolutivité du système.
 
-\section*{Références}
+\subsection*{Organisation du code}
+Avant d'entamer le développement, nous avons conçu une structure de projet inspirée de l'architecture MVC :
+\begin{itemize}
+    \item \textbf{Modèle (Model)} : les classes métier représentant les entités (Person, Room, Conference, ComputerRoom).
+    \item \textbf{Vue (View)} : l’interface graphique conçue avec Tkinter.
+    \item \textbf{Contrôleur (Controller)} : les fonctions de gestion des interactions entre la Vue et le Modèle.
+\end{itemize}
+
+Cette structuration nous a permis d’avoir une séparation claire des responsabilités et de rendre notre application plus facile à tester, maintenir et faire évoluer.
+
+\subsection*{Cycle de développement}
+Nous avons suivi une démarche agile couplée avec le modèle V en découpant le projet en plusieurs phases :
+\begin{enumerate}
+    \item \textbf{Spécification fonctionnelle} : définition des fonctionnalités clés.
+    \item \textbf{Conception UML et modélisation des classes}.
+    \item \textbf{Implémentation incrémentale} : développement progressif avec tests réguliers.
+    \item \textbf{Intégration et débogage}.
+    \item \textbf{Finalisation et documentation}.
+\end{enumerate}
+
+\newpage
+\section{Fonctionnement du syst\`eme} \label{fonction_sys}
+
+Le syst\`eme repose sur une architecture respectant le mod\`ele MVC. Le sch\'ema ci-dessous illustre les relations entre les diff\'erents composants :
+
+\begin{tikzpicture}[node distance=3cm]
+    \tikzstyle{box} = [rectangle, draw, fill=blue!20, text centered, minimum height=1.5cm, minimum width=2.5cm]
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+
+    \node (interface) [box] {Interface Graphique};
+    \node (controleur) [box, right of=interface, xshift=3cm] {Contr\^oleur};
+    \node (src) [box, right of=controleur, xshift=3cm] {Mod\`ele};
+
+    \node (interactions) [box, below of=interface, yshift=-0.5cm] {Interactions Utilisateur};
+    \node (fonctions) [box, below of=controleur, yshift=-0.5cm] {Fonctions Backend};
+    \node (logique) [box, below of=src, yshift=-0.5cm] {Logique Syst\`eme};
+
+    \draw [arrow] (interface) -- (controleur);
+    \draw [arrow] (controleur) -- (src);
+    \draw [arrow] (interface) -- (interactions);
+    \draw [arrow] (controleur) -- (fonctions);
+    \draw [arrow] (src) -- (logique);
+\end{tikzpicture}
+
+Deux groupes de classes principaux ont \'et\'e d\'efinis :
+
+\subsection{Gestion des utilisateurs}
+La classe \texttt{Person} g\`ere les informations des clients ainsi que leurs r\'eservations. Elle permet l'ajout, la suppression et la consultation de r\'eservations, ainsi que la sauvegarde dans un fichier JSON.\\
+\\
+Une représentation de cette classe est la suivante:\\
+
+\begin{tikzpicture}[node distance=2cm]
+
+    \tikzstyle{class} = [rectangle, draw, text width=8cm, text centered, minimum height=1.5cm, minimum width=2.5cm]
+    \node (person) [class] {
+        \textbf{Person} \\
+        \rule{\linewidth}{0.4pt}
+        - firstname: str \\
+        - sirname: str \\
+        - name: str \\
+        - email: str \\
+        - reservations: dict \\
+        - id: str \\
+        - file\_path: str \\
+        \rule{\linewidth}{0.4pt}
+        + \_\_init\_\_(firstname: str, sirname: str, email: str) \\
+        + add\_reservation(reservation\_data: dict) -> None \\
+        + remove\_reservation(reservation\_data: dict) -> None \\
+        + get\_reservations() -> dict \\
+        + id\_generator() -> None \\
+        + \_\_str\_\_() -> str \\
+        + \_\_repr\_\_() -> str \\
+        + save\_to\_file() -> None \\
+        + from\_save(json\_data) -> Person \\
+        + void\_person() -> Person \\
+        + from\_search(ID: str) -> Person \\
+    };
+
+\end{tikzpicture}
+
+\subsection{Gestion des salles}
+La classe \texttt{Standard} d\'efinit les fonctionnalit\'es communes \`a toutes les salles.\\
+Deux classes h\'eritant de \texttt{Standard} sp\'ecialisent son comportement pour l'adapter aux types de salles également disponibles à la location:
+\texttt{Conference} v\'erifie que la salle n'est pas surdimensionn\'ee pour l'\'ev\'enement, et \texttt{ComputerRoom} liste les \'equipements informatiques disponibles dans ce type de salle.\\
+\\
+La représentation de ces classes et de leurs relations est la suivante:\\
+\\
+
+\begin{tikzpicture}[node distance=1cm and 1cm]
+
+
+    \tikzstyle{class} = [rectangle, draw, text width=7cm, text centered, minimum height=1.5cm, minimum width=2.5cm]
+
+    \node (standard) [class] {
+        \textbf{Standard} \\
+        \rule{\linewidth}{0.4pt}
+        - name: str \\
+        - capacity: int \\
+        - reservations: dict \\
+        - file\_path: str \\
+        \rule{\linewidth}{0.4pt}
+        + \_\_init\_\_(name: str, capacity: int, reservations: dict) \\
+        + \_\_str\_\_() -> str \\
+        + \_\_repr\_\_() -> str \\
+        + too\_small(number\_of\_people: int) -> bool \\
+        + reservation\_duration\_valid(duration: int) -> bool \\
+        + return\_type() -> str \\
+        + add\_reservation(bloc: dict) -> None \\
+        + remove\_reservation(bloc: dict) -> bool \\
+        + get\_reservations() -> dict \\
+        + save\_to\_file() -> None \\
+        + load\_from\_json(room\_name: str) -> Standard \\
+    };
+
+    \node (conference) [class, below left=1cm and -3cm of standard] {
+        \textbf{Conference} \\
+        \rule{\linewidth}{0.4pt}
+        \rule{\linewidth}{0.4pt}
+        + \_\_init\_\_(name: str, capacity: int) \\
+        + \_\_str\_\_() -> str \\
+        + \_\_repr\_\_() -> str \\
+        + too\_big(number\_of\_people: int) -> bool \\
+        + return\_type() -> str \\
+    };
+
+    \node (computerroom) [class, below right=1cm and -3cm of standard] {
+        \textbf{ComputerRoom} \\
+        \rule{\linewidth}{0.4pt}
+        - equipment: list \\
+        \rule{\linewidth}{0.4pt}
+        + \_\_init\_\_(name: str, capacity: int) \\
+        + return\_equipment() -> str \\
+        + \_\_str\_\_() -> str \\
+        + \_\_repr\_\_() -> str \\
+        + return\_type() -> str \\
+    };
+
+    \draw [->] (conference) -- (standard);
+    \draw [->] (computerroom) -- (standard);
+
+\end{tikzpicture}
+
+
+\section{Difficult\'es rencontr\'ees}
+Plusieurs difficult\'es techniques et organisationnelles ont \'et\'e rencontr\'ees au cours du projet. Parmi celles-ci :
+\begin{itemize}
+    \item Comprendre et ma\^itriser la biblioth\`eque \texttt{Tkinter} pour construire une interface graphique fonctionnelle et ergonomique.
+    \item G\'erer les erreurs lors de l'acc\`es aux fichiers JSON (lecture, \'ecriture, corruption).
+    \item Mettre en place un syst\`eme de sauvegarde robuste avec cr\'eation dynamique de fichiers.
+    \item Assurer une bonne coordination entre les diff\'erentes parties du code (classes, interface, contr\^oleur).
+\end{itemize}
+
+\section{R\'esultats}
+Le projet MeetingPro permet aujourd'hui de :
+\begin{itemize}
+    \item Cr\'eer, modifier et supprimer des utilisateurs.
+    \item Ajouter et g\'erer des r\'eservations de salles.
+    \item Afficher dynamiquement les donn\'ees relatives \`a chaque salle.
+    \item Sauvegarder automatiquement les donn\'ees sous forme de fichiers JSON s\'epar\'es.
+\end{itemize}
+
+Le code est modulaire, extensible, et conforme aux principes de la programmation orient\'ee objet.
+
+\newpage
+\section*{R\'ef\'erences}
 \nocite{*}
 \printbibliography
-% \bibliographystyle{plain}
-% \bibliography{bibliographie}
+
 \end{document}

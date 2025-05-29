@@ -17,13 +17,9 @@ Toutes héritent de la classe `Standard`.
             +--------------------------------------+
             |               Standard               |
             +--------------------------------------+
-            | - nom: String                        |
-            | - nbPlaces: int                      |
+            |                                      |
             +--------------------------------------+
-            | +tropDePersonnes(n: int): bool       |
-            | +dureeReservationValide(): bool      |
-            | +estDisponible(): bool               |
-            | +disponibleAPartirDe(): int List[5]  |
+            |                                      |
             +--------------------------------------+
                                 ^
                                 |
@@ -32,9 +28,9 @@ Toutes héritent de la classe `Standard`.
     +--------------------------+           +----------------------+
     |        Conférence        |           |   Informatique       |
     +--------------------------+           +----------------------+
-    |                          |           | - equipement : str   |
+    |                          |           |                      |
     +--------------------------+           +----------------------+
-    | +tropPeuDeMonde(n): bool |           |                      |
+    |                          |           |                      |
     +--------------------------+           +----------------------+
 ```
 
