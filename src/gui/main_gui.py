@@ -189,11 +189,15 @@ class Main_Window:
         # Create an OptionMenu for room type selection
         self.entry_client_id = tk.StringVar(window)
         if not self.clients:
-            self.entry_client_id.set("pas de client enregistrer") # default value
+            # If no clients are registered, set a default value
+            self.entry_client_id.set("pas de client enregistré")  # default value
             ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
             self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, "pas de client enregistrer").grid(row=0, column=1, padx=10, pady=10)
         else:
-            (self.client_id, self.client_name), *self.rest = self.clients
+            # If clients are registered, populate the dropdown with client names
+            (self.client_id, self.client_name, self.client_mail), *self.rest = (
+                self.clients
+            )
             #self.entry_client_id.set(self.clients("name")) # default value
             ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
             self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, *self.client_name).grid(row=0, column=1, padx=10, pady=10)

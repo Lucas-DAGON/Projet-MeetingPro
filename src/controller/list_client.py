@@ -28,7 +28,8 @@ def list_clients():
         # open each file and load the full name and id
         with open(path.join(CLIENTS_DIR, filename), "r") as f:
             data = loads(f.read())
-            client = {"id": data["id"], "name": data["name"]}
+            client = {"id": data["id"], "name": data["name"], "email": data["email"]}
+            # Add the client to the list
             clients.append(client)
     # Sort the list of clients by full name
     clients.sort(key=lambda x: x["name"])

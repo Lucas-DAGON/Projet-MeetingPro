@@ -18,8 +18,7 @@ import hmac
 import hashlib
 from src.person_logic.verify_overlapping import check_overlap_lists
 
-# Todo:
-# - Discuss if we should implement a secret key or leave it like this
+# A mock secret key for HMAC generation
 SecretKey = "secret_key".encode("utf-8")
 
 # Set up logging
