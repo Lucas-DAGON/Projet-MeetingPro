@@ -12,8 +12,9 @@
 # Import necessary modules
 from conference import Standard
 
+
 class ComputerRoom(Standard):
-    def __init__(self, name:str, capacity:int = 4):
+    def __init__(self, name: str, capacity: int = 4):
         """
         Initialize a computer meeting room.
 
@@ -30,7 +31,7 @@ class ComputerRoom(Standard):
         :return: String representation of the equipment.
         """
         return f"Equipment: {', '.join(self.equipment)}"
-    
+
     def __str__(self):
         """
         Return a string representation of the computer meeting room.
@@ -38,7 +39,7 @@ class ComputerRoom(Standard):
         :return: String representation of the computer meeting room.
         """
         return f"Computer Room: {self.name}, Capacity: {self.capacity}, Equipment: {', '.join(self.equipment)}"
-    
+
     def __repr__(self):
         """
         Return a string representation of the computer meeting room for debugging.

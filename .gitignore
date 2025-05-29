@@ -203,3 +203,7 @@ latex.out/
 
 # Test file
 test.py
+
+# json files
+persons/*.json
+room/*.json

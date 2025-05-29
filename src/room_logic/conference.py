@@ -10,7 +10,7 @@
 #################################################################
 
 # Import necessary modules
-from standard import Standard
+from src.room_logic.standard import Standard
 
 class Conference(Standard):
     def __init__(self, name: str, capacity: int = 10):
