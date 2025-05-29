@@ -172,3 +172,38 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Fichiers temporaires LaTeX
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fls
+*.fdb_latexmk
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.run.xml
+*.bcf
+
+# Dossiers générés
+_build/
+latex.out/
+
+# Test file
+test.py
+
+# json files
+persons/*.json
+room/*.json
