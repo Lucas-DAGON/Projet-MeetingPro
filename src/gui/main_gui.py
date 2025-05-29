@@ -2,20 +2,21 @@
 # -*- coding: utf-8 -*-
 ###########################################################################################
 # Project: MeetingPro
-# File: main_window.py
+# File: main_gui.py
 ###########################################################################################
 # Creation Date: 23-04-2025
 # Authors: Lucas DAGON
-# Description: This script creates the main window that can open all other windows.
+# Description: This script creates the main window.
 ###########################################################################################
 
 import tkinter as tk
-import os
-import sys
 from PIL import Image, ImageTk
 from tkinter import ttk, messagebox
-from src.controller.add_client import add_client
+from src.gui.bg_image import background_image
+from src.gui.add_client_gui import add_client_gui
 from src.controller.add_room import add_room
+from src.controller.reservation import reserve_room
+from src.controller.list_client import list_clients
 
 
 
@@ -24,15 +25,18 @@ from src.controller.add_room import add_room
 
 class Main_Window:
     """ Creates the main window of the application. """
-    clients = {}
-    rooms = {}
-    reservations = {}
-    fullscreenstate = False
-    room_types = ["Standard", "Standard", "Conference Room", "Computer Room"] # "Standard" needs to be put initialised twice so it is display in dropdown menu
+    clients:dict = {}
+    rooms:dict = {}
+    reservations:dict = {}
+    fullscreenstate:bool = False
+    room_types:list = ["Standard", "Standard", "Conference Room", "Computer Room"] # "Standard" needs to be initialised twice so it is displayed correctly in the dropdown menu
+    client_id:int = 0
+    rooms_id:int = 0
     
     def __init__(self, master):
         self.master = master
-        
+        self.clients = list_clients()  # Load clients from the database
+        self.client_id = len(self.clients)
 
         self.window = ttk.Notebook(master)
         self.window.pack(pady=10, expand=True, fill="both")
@@ -78,48 +82,14 @@ class Main_Window:
             self.is_room_reservable_ui(self.tab_show),
             text="Afficher les salles disponibles",
         )
-
-    def background_image(self, frame)-> None:
-        """This function creates the background image of the gui."""
-        # BG base path
-        os.chdir(sys.path[0])
-
-        # Change the path to the background image
-        # Debugging
-        if __name__ == "__main__":
-            self.path_to_bg = "BG.jpg"
-        else:
-            self.path_to_bg = "src/gui/BG.jpg"
-
-        self.full_path_to_bg:str = os.path.join(os.getcwd(), self.path_to_bg)
-        self.image = Image.open(self.full_path_to_bg)
-        self.image = ImageTk.PhotoImage(self.image, master = self.master)
-
-        # Create a label to display the image
-        self.image_label = tk.Label(frame, image = self.image)
-        self.image_label.place(x=0, y=0, relwidth=1, relheight=1)
-        self.image_label.image = self.image
-
-    def close_windows(self):
-        self.master.destroy()
-
-    def toggle_fullscreen(self, event=None):
-        self.fullscreenstate = not self.fullscreenstate  # Just toggling the boolean
-        self.master.attributes("-fullscreen", self.fullscreenstate)
-        return "break"
-
-    def end_fullscreen(self, event=None):
-        self.fullscreenstate = False
-        self.master.attributes("-fullscreen", False)
-        return "break"
     
-    def add_client(self, surname, name, email_address):
-        if not surname or not name or not email_address:
-            return "Erreur: Tous les champs doivent être remplis."
-
-        self.client_id = len(self.clients) + 1
-        self.clients[self.client_id] = add_client(name, surname, email_address)
-        return True
+#    def add_client(self, surname, name, email_address):
+#        if not surname or not name or not email_address:
+#            return "Erreur: Tous les champs doivent être remplis."
+#
+#        self.client_id = len(self.clients) + 1
+#        self.clients[self.client_id] = add_client(name, surname, email_address)
+#        return True
 
     def add_room(self, name_room, room_capacity, room_type):
         if not name_room:
@@ -137,32 +107,17 @@ class Main_Window:
         if not self.rooms[room_id]["Disponible"]:
             return "Erreur: Salle non disponible."
 
-        self.reservations[len(self.reservations) + 1] = {
-            "Client ID": client_id,
-            "Salle ID": room_id,
-            "Date de début": date_begin,
-            "Date de fin": date_end,
-        }
-        self.rooms[room_id]["Disponible"] = False
+        #room_reserved = reserve_room(, , room_id, client_id)
         return True
 
-
-    def show_rooms(self):
-        return list(self.rooms.values())
-
-
-    def show_clients(self):
-        return list(self.clients.values())
-
-
     def show_reservable_rooms(self, date_begin, date_end):
-        self.room_reservable = [self.room for self.room in self.rooms.values() if self.room["Disponible"]]
+        self.room_reservable = [self.room for self.room in self.rooms if self.room["Disponible"]]
         return self.room_reservable
 
 
     def add_client_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
         ttk.Label(self.frame, text="Nom:").grid(row=0, column=0, padx=10, pady=10)
         self.entry_surname = ttk.Entry(self.frame)
@@ -180,7 +135,7 @@ class Main_Window:
             surname = self.entry_surname.get()
             name = self.entry_name.get()
             email = self.entry_email.get()
-            result = self.add_client(surname, name, email)
+            (result, self.client_id, self.clients) = add_client_gui(surname, name, email, self.client_id, self.clients)
             if result is True:
                 messagebox.showinfo("Succès", "Client ajouté avec succès!")
             else:
@@ -194,7 +149,7 @@ class Main_Window:
 
     def add_room_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
         ttk.Label(self.frame, text="Nom de la salle:").grid(row=0, column=0, padx=10, pady=10)
         self.entry_room_name = ttk.Entry(self.frame)
@@ -229,15 +184,25 @@ class Main_Window:
 
     def reservation_room_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
-        ttk.Label(self.frame, text="ID du client:").grid(row=0, column=0, padx=10, pady=10)
-        self.entry_client_id = ttk.Entry(self.frame)
-        self.entry_client_id.grid(row=0, column=1, padx=10, pady=10)
+        # Create an OptionMenu for room type selection
+        self.entry_client_id = tk.StringVar(window)
+        if not self.clients:
+            self.entry_client_id.set("pas de client enregistrer") # default value
+            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
+            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, "pas de client enregistrer").grid(row=0, column=1, padx=10, pady=10)
+        else:
+            (self.client_id, self.client_name), *self.rest = self.clients
+            #self.entry_client_id.set(self.clients("name")) # default value
+            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
+            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, *self.client_name).grid(row=0, column=1, padx=10, pady=10)
 
-        ttk.Label(self.frame, text="ID de la salle:").grid(row=1, column=0, padx=10, pady=10)
-        self.entry_room_id = ttk.Entry(self.frame)
-        self.entry_room_id.grid(row=1, column=1, padx=10, pady=10)
+        # Create an OptionMenu for room type selection
+        self.entry_room_id = tk.StringVar(window)
+        #self.entry_room_id.set(self.rooms(0)) # default value
+        ttk.Label(self.frame, text="salle id:").grid(row=1, column=0, padx=10, pady=10)
+        self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, *self.rooms).grid(row=1, column=1, padx=10, pady=10)
 
         ttk.Label(self.frame, text="Date de début:").grid(row=2, column=0, padx=10, pady=10)
         self.entry_date_begin = ttk.Entry(self.frame)
@@ -266,9 +231,9 @@ class Main_Window:
 
     def show_room_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
-        self.room_list = self.show_rooms()
+        self.room_list = self.rooms
         self.text = tk.Text(self.frame)
         self.text.insert(
             tk.END,
@@ -286,16 +251,16 @@ class Main_Window:
 
     def show_client_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
-        self.clients_list = self.show_clients()
+        self.clients_list = self.clients
         self.text = tk.Text(self.frame)
         self.text.insert(
             tk.END,
             "\n".join(
                 [
-                    f"ID: {self.id}, Nom: {self.client['Nom']}, Prénom: {self.client['Prénom']}, Email: {self.client['Adresse email']}"
-                    for self.id, self.client in enumerate(self.clients_list, start=1)
+                    f"ID: {self.client['id']}, Nom: {self.client['name']}"
+                    for self.id, self.client in enumerate(self.clients, start=1)
                 ]
             ),
         )
@@ -306,7 +271,7 @@ class Main_Window:
 
     def is_room_reservable_ui(self, window):
         self.frame = ttk.Frame(window)
-        self.background_image(self.frame)
+        background_image(self.frame)
 
         self.date_begin = "2025-10-01"  
         self.date_fin = "2023-10-02"
