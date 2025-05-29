@@ -16,12 +16,12 @@ from src.room_logic.conference import Conference
 from src.room_logic.computer import ComputerRoom
 
 
-def reserve_room(date, bloc, room: Standard, person: Person) -> bool:
+def reserve_room(date: str, bloc: list, room, person: Person) -> bool:
     """
     Function to reserve a room for a given time slot and person.
-    :param date: Date of the reservation in 'YYYY-MM-DD' format
+    :param date: Date of the reservation in 'YYYY/MM/DD' format
     :param bloc: Time slot for the reservation, e.g., [9,0, 10, 0] for 9:00 to 10:00
-    :param room: Room object to be reserved
+    :param room: Room object to be reserved (either Standard, Conference, or ComputerRoom)
     :param person: Person object making the reservation
     :return: True if ended properly
     """
