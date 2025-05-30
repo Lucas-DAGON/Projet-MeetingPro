@@ -17,6 +17,8 @@ from src.gui.add_client_gui import add_client_gui
 from src.controller.add_room import add_room
 from src.controller.reservation import reserve_room
 from src.controller.list_client import list_clients
+from src.controller.list_rooms import list_rooms
+from src.controller.list_reservations import list_reservations
 
 
 
@@ -31,12 +33,20 @@ class Main_Window:
     fullscreenstate:bool = False
     room_types:list = ["Standard", "Standard", "Conference Room", "Computer Room"] # "Standard" needs to be initialised twice so it is displayed correctly in the dropdown menu
     client_id:int = 0
-    rooms_id:int = 0
+    room_id:int = 0
     
     def __init__(self, master):
         self.master = master
-        self.clients = list_clients()  # Load clients from the database
+
+        try:
+            # Assuming that a list of clients, rooms and reservations already exists
+            self.clients = list_clients()
+            self.rooms = list_rooms()  
+        except FileNotFoundError:
+            pass  # If the file does not exist, we will start with empty lists
+
         self.client_id = len(self.clients)
+        self.room_id = len(self.rooms)
 
         self.window = ttk.Notebook(master)
         self.window.pack(pady=10, expand=True, fill="both")
@@ -99,7 +109,7 @@ class Main_Window:
         self.rooms[self.rooms_id] = add_room(name_room, room_capacity, room_type)
         return True
 
-    def reserve_room(self, client_id, room_id, date_begin, date_end):
+    def reserve_room(self, client_id, room_id, date, Hour_of_meeting):
         if client_id not in self.clients:
             return "Erreur: Client non trouvé."
         if room_id not in self.rooms:
@@ -107,12 +117,11 @@ class Main_Window:
         if not self.rooms[room_id]["Disponible"]:
             return "Erreur: Salle non disponible."
 
-        #room_reserved = reserve_room(, , room_id, client_id)
+        self.reservations = reserve_room(date, Hour_of_meeting, room_id, client_id)
         return True
 
     def show_reservable_rooms(self, date_begin, date_end):
-        self.room_reservable = [self.room for self.room in self.rooms if self.room["Disponible"]]
-        return self.room_reservable
+        pass
 
 
     def add_client_ui(self, window):
@@ -135,11 +144,14 @@ class Main_Window:
             surname = self.entry_surname.get()
             name = self.entry_name.get()
             email = self.entry_email.get()
-            (result, self.client_id, self.clients) = add_client_gui(surname, name, email, self.client_id, self.clients)
-            if result is True:
-                messagebox.showinfo("Succès", "Client ajouté avec succès!")
-            else:
-                messagebox.showerror("Erreur", result)
+            try: 
+                (result, self.client_id, self.clients) = add_client_gui(surname, name, email, self.client_id, self.clients)
+                if result is True:
+                    messagebox.showinfo("Succès", "Client ajouté avec succès!")
+                else:
+                    messagebox.showerror("Erreur", result)
+            except ValueError as e:
+                messagebox.showerror("Erreur", str(e))
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
         self.button_validate.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
@@ -188,43 +200,74 @@ class Main_Window:
 
         # Create an OptionMenu for room type selection
         self.entry_client_id = tk.StringVar(window)
+        self.entry_room_id = tk.StringVar(window)
         if not self.clients:
-            self.entry_client_id.set("pas de client enregistrer") # default value
+            # If no clients are registered, set a default value
+            self.entry_client_id.set("pas de client enregistré")  # default value that for some reason isn't displayed
             ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
             self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, "pas de client enregistrer").grid(row=0, column=1, padx=10, pady=10)
         else:
-            (self.client_id, self.client_name), *self.rest = self.clients
-            #self.entry_client_id.set(self.clients("name")) # default value
+            # If clients are registered, populate the dropdown with client names
+            self.default =("choisie un nom")
+            self.client_name = list(map(lambda x : x['name'], self.clients))
+            self.entry_client_id.set(self.default) # default value that for some reason isn't displayed
             ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
-            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, *self.client_name).grid(row=0, column=1, padx=10, pady=10)
+            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, self.default, *self.client_name).grid(row=0, column=1, padx=10, pady=10)
 
-        # Create an OptionMenu for room type selection
-        self.entry_room_id = tk.StringVar(window)
-        #self.entry_room_id.set(self.rooms(0)) # default value
-        ttk.Label(self.frame, text="salle id:").grid(row=1, column=0, padx=10, pady=10)
-        self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, *self.rooms).grid(row=1, column=1, padx=10, pady=10)
+        if not self.rooms:
+            # If no clients are registered, set a default value
+            self.entry_room_id.set("pas de salle enregistré")  # default value that for some reason isn't displayed
+            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
+            self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, "pas de salle enregistré").grid(row=0, column=1, padx=10, pady=10)
+        else:
+            # Create an OptionMenu for room type selection
+            self.default_room =("choisie une salles")
+            self.room_name = list(map(lambda x : x['name'], self.rooms))
+            self.entry_room_id.set(self.default_room) # default value that for some reason isn't displayed
+            ttk.Label(self.frame, text="Salle id:").grid(row=1, column=0, padx=10, pady=10)
+            self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, self.default_room, *self.room_name).grid(row=1, column=1, padx=10, pady=10)
 
-        ttk.Label(self.frame, text="Date de début:").grid(row=2, column=0, padx=10, pady=10)
-        self.entry_date_begin = ttk.Entry(self.frame)
-        self.entry_date_begin.grid(row=2, column=1, padx=10, pady=10)
+        ttk.Label(self.frame, text="Date:").grid(row=2, column=0, padx=10, pady=10)
+        self.entry_date = ttk.Entry(self.frame)
+        self.entry_date.grid(row=2, column=1, padx=10, pady=10)
 
-        ttk.Label(self.frame, text="Date de fin:").grid(row=3, column=0, padx=10, pady=10)
-        self.entry_date_end = ttk.Entry(self.frame)
-        self.entry_date_end.grid(row=3, column=1, padx=10, pady=10)
+        # Beginning of the meeting
+        ttk.Label(self.frame, text="heure de début:").grid(row=3, column=0, padx=10, pady=10)
+        self.entry_hour_begin = ttk.Entry(self.frame)
+        self.entry_hour_begin.grid(row=3, column=1, padx=10, pady=10)
+        ttk.Label(self.frame, text="h").grid(row=3, column=2, padx=10, pady=10)
+
+        self.entry_minute_begin = ttk.Entry(self.frame)
+        self.entry_minute_begin.grid(row=3, column=3, padx=10, pady=10)
+        ttk.Label(self.frame, text="min").grid(row=3, column=4, padx=10, pady=10)
+
+        # End of the meeting
+        ttk.Label(self.frame, text="heure de fin:").grid(row=4, column=0, padx=10, pady=10)
+        self.entry_hour_end = ttk.Entry(self.frame)
+        self.entry_hour_end.grid(row=4, column=1, padx=10, pady=10)
+        ttk.Label(self.frame, text="h").grid(row=4, column=2, padx=10, pady=10)
+
+        self.entry_minute_end = ttk.Entry(self.frame)
+        self.entry_minute_end.grid(row=4, column=3, padx=10, pady=10)
+        ttk.Label(self.frame, text="min").grid(row=4, column=4, padx=10, pady=10)
 
         def validate():
-            client_id = int(self.entry_client_id.get())
-            room_id = int(self.entry_room_id.get())
-            date_begin = self.entry_date_begin.get()
-            date_end = self.entry_date_end.get()
-            result = self.reserve_room(client_id, room_id, date_begin, date_end)
+            client_name = self.entry_client_id.get()
+            room_name = self.entry_room_id.get()
+            date = self.entry_date.get()
+            hours:list = []
+            hours.append(self.entry_hour_begin.get())
+            hours.append(self.entry_minute_begin.get())
+            hours.append(self.entry_hour_end.get()) 
+            hours.append(self.entry_minute_end.get()) 
+            result = self.reserve_room(date, hours, room_name, client_name)
             if result is True:
                 messagebox.showinfo("Succès", "Salle réservée avec succès!")
             else:
                 messagebox.showerror("Erreur", result)
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
-        self.button_validate.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+        self.button_validate.grid(row=5, column=1, columnspan=2, padx=10, pady=10)
 
         return self.frame
 
@@ -239,8 +282,8 @@ class Main_Window:
             tk.END,
             "\n".join(
                 [
-                    f"ID: {self.id}, Nom: {self.room['Nom']}, Disponible: {self.room['Disponible']}"
-                    for self.id, self.room in enumerate(self.room_list, start=1)
+                    f"Nom: {self.room['name']}, Type: {self.room['type']}, Capacité: {self.room['capacity']}"
+                    for self.id, self.room in enumerate(self.rooms, start=1)
                 ]
             ),
         )
@@ -259,7 +302,7 @@ class Main_Window:
             tk.END,
             "\n".join(
                 [
-                    f"ID: {self.client['id']}, Nom: {self.client['name']}"
+                    f"Nom: {self.client['name']}, Email: {self.client['email']}"
                     for self.id, self.client in enumerate(self.clients, start=1)
                 ]
             ),
@@ -281,8 +324,8 @@ class Main_Window:
             tk.END,
             "\n".join(
                 [
-                    f"ID: {self.id}, Nom: {self.room['Nom']}"
-                    for self.id, self.room in enumerate(self.salles_disponibles, start=1)
+                    f"Nom: {self.room['name']}, Type: {self.room['type']}, Capacité: {self.room['capacity']}"
+                    for self.id, self.room in enumerate(self.rooms, start=1)
                 ]
             ),
         )

@@ -1,0 +1,12 @@
+# TODO
+- [ ] afficher boutons accueil
+- [X] Affichage messages d'erreur
+- [ ] boutons annuler
+- [ ] systeme de recherche client
+- [ ] Verifier si retour durée
+- [ ] lister en fonction du type de salle
+- [ ] Afficher les salles disponnibles pour un créneau
+- [ ] Afficher reservations client
+- [ ] fichiers test
+- [ ] README
+- [ ] Retravailler le rapport

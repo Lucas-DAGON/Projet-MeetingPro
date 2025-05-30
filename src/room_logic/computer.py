@@ -10,10 +10,11 @@
 #################################################################
 
 # Import necessary modules
-from src.room_logic.conference import Conference
+from src.room_logic.standard import Standard
 
-class ComputerRoom(Conference):
-    def __init__(self, name:str, capacity:int = 4):
+
+class ComputerRoom(Standard):
+    def __init__(self, name: str, capacity: int = 4):
         """
         Initialize a computer meeting room.
 
@@ -30,7 +31,7 @@ class ComputerRoom(Conference):
         :return: String representation of the equipment.
         """
         return f"Equipment: {', '.join(self.equipment)}"
-    
+
     def __str__(self):
         """
         Return a string representation of the computer meeting room.
@@ -38,7 +39,7 @@ class ComputerRoom(Conference):
         :return: String representation of the computer meeting room.
         """
         return f"Computer Room: {self.name}, Capacity: {self.capacity}, Equipment: {', '.join(self.equipment)}"
-    
+
     def __repr__(self):
         """
         Return a string representation of the computer meeting room for debugging.
@@ -51,6 +52,6 @@ class ComputerRoom(Conference):
         """
         Return the type of the meeting room.
 
-        :return: Type of the meeting room.
+        :return: String of the type of the meeting room.
         """
         return "Computer Room"
