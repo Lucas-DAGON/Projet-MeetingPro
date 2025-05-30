@@ -24,6 +24,9 @@ def list_clients():
     :return: List of clients
     """
     clients = []
+    # Verify if the clients directory exists
+    if not path.exists(CLIENTS_DIR):
+        return clients  # Return empty list if directory does not exist
     for filename in listdir(CLIENTS_DIR):
         # open each file and load the full name and id
         with open(path.join(CLIENTS_DIR, filename), "r") as f:

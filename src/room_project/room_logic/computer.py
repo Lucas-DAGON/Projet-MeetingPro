@@ -10,7 +10,7 @@
 #################################################################
 
 # Import necessary modules
-from src.room_logic.standard import Standard
+from .standard import Standard
 
 
 class ComputerRoom(Standard):

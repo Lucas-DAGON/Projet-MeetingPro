@@ -10,10 +10,10 @@
 #################################################################
 
 # Imports
-from src.person_logic.person import Person
+from ..person_logic.person import Person
 
 
-def add_client(first_name:str, last_name:str, email:str) -> Person:
+def add_client(first_name: str, last_name: str, email: str) -> Person:
     """
     Function to add a client to the database
     :param first_name: First name of the client

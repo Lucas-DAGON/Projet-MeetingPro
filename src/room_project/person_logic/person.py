@@ -16,7 +16,7 @@ from pathlib import Path
 import logging
 import hmac
 import hashlib
-from src.person_logic.verify_overlapping import check_overlap_lists
+from .verify_overlapping import check_overlap_lists
 
 # A mock secret key for HMAC generation
 SecretKey = "secret_key".encode("utf-8")
@@ -218,10 +218,12 @@ class Person:
             # Load the json data
             # We will use the dumps method to convert the json data to a string
             data = loads(json_data)
-            firstname = data.get("firstname")
-            sirname = data.get("sirname")
-            email = data.get("email")
-            person = cls(firstname, sirname, email)
+            # Shortcut the constructor
+            person = cls.__new__(cls)  # Create an instance without calling __init__
+            person.firstname = data.get("firstname")
+            person.sirname = data.get("sirname")
+            person.email = data.get("email")
+            person.name = f"{person.firstname} {person.sirname}"
             person.reservations = data.get("reservations", [])
             person.id = data.get("id")
             return person

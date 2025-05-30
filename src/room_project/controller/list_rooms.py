@@ -16,12 +16,15 @@ from pathlib import Path
 ROOM_DIR = path.join(Path(__file__).parent.parent.parent, "room")
 
 
-def list_clients():
+def list_rooms():
     """
     Function to list all rooms in the database
     :return: List of rooms
     """
     rooms = []
+    # Verify if the rooms directory exists
+    if not path.exists(ROOM_DIR):
+        return rooms  # Return empty list if directory does not exist
     for filename in listdir(ROOM_DIR):
         # open each file and load the full name and id
         with open(path.join(ROOM_DIR, filename), "r") as f:

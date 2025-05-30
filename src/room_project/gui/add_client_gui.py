@@ -1,4 +1,5 @@
-from src.controller.add_client import add_client
+from ..controller.add_client import add_client
+
 
 def add_client_gui(
     surname: str, name: str, email_address: str, client_id: int, clients: list
