@@ -10,11 +10,7 @@ def background_image(frame)-> None:
         os.chdir(sys.path[0])
 
         # Change the path to the background image
-        # Debugging
-        if __name__ == "__main__":
-            path_to_bg = "BG.jpg"
-        else:
-            path_to_bg = "src/gui/BG.jpg"
+        path_to_bg = "src/gui/BG.jpg"
 
         full_path_to_bg:str = os.path.join(os.getcwd(), path_to_bg)
         image = Image.open(full_path_to_bg)
