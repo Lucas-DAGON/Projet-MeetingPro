@@ -13,12 +13,12 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import ttk, messagebox
 from src.gui.bg_image import background_image
-from src.gui.add_client_gui import add_client_gui
 from src.controller.add_room import add_room
 from src.controller.reservation import reserve_room
 from src.controller.list_client import list_clients
 from src.controller.list_rooms import list_rooms
 from src.controller.list_reservations import list_reservations
+from src.controller.add_client import add_client
 
 
 
@@ -31,11 +31,12 @@ class Main_Window:
     rooms:dict = {}
     reservations:dict = {}
     fullscreenstate:bool = False
-    room_types:list = ["Standard", "Standard", "Conference Room", "Computer Room"] # "Standard" needs to be initialised twice so it is displayed correctly in the dropdown menu
+    room_types:list = ["Standard", "Conference Room", "Computer Room"]
     client_id:int = 0
     room_id:int = 0
     
     def __init__(self, master):
+        master.title("MeetingPro")
         self.master = master
 
         try:
@@ -55,7 +56,6 @@ class Main_Window:
         self.frame_main = ttk.Frame(self.window)
         self.window.add(self.frame_main, text="Accueil")
         
-
         self.frame_add_client = ttk.Frame(self.window)
         self.window.add(self.frame_add_client, text="Ajouter")
 
@@ -71,7 +71,6 @@ class Main_Window:
 
         self.tab_add_client.add(self.add_client_ui(self.tab_add_client), text="Ajouter un client")
         self.tab_add_client.add(self.add_room_ui(self.tab_add_client), text="Ajouter une salle")
-        
 
 
         # Add "Réserver" tab
@@ -80,33 +79,76 @@ class Main_Window:
 
         self.tab_reservation.add(self.reservation_room_ui(self.tab_reservation), text="Réserver une salle")
 
+
         # Add "Afficher" tab
         self.tab_show = ttk.Notebook(self.frame_show_reservation)
         self.tab_show.pack(expand=True, fill="both")
 
         self.tab_show.add(self.show_room_ui(self.tab_show), text="Afficher les salles")
-        self.tab_show.add(
-            self.show_client_ui(self.tab_show), text="Afficher les clients"
-        )
-        self.tab_show.add(
-            self.is_room_reservable_ui(self.tab_show),
-            text="Afficher les salles disponibles",
-        )
-    
-#    def add_client(self, surname, name, email_address):
-#        if not surname or not name or not email_address:
-#            return "Erreur: Tous les champs doivent être remplis."
-#
-#        self.client_id = len(self.clients) + 1
-#        self.clients[self.client_id] = add_client(name, surname, email_address)
-#        return True
+        self.tab_show.add(self.show_client_ui(self.tab_show), text="Afficher les clients")
+        self.tab_show.add(self.is_room_reservable_ui(self.tab_show),text="Afficher les salles disponibles")
+
+        # Add "Accueil" tab
+        self.tab_main = ttk.Notebook(self.frame_main)
+        self.tab_main.pack(expand=True, fill="both")
+
+        self.tab_main.add(self.main_screen_ui(self.tab_main), text="Menu principal")
+
+
+    def client_data_updater(self, text: tk.Text) -> None:
+        """ Updates the data in the application. """
+        text.delete(1.0, tk.END)  # Clear the text widget before updating
+        try:
+            # Assuming that a list of clients already exists
+            self.clients = list_clients() 
+        except FileNotFoundError:
+            text.insert(tk.END, "Aucun client enregistré.\n")
+        
+        self.clients = list_clients()
+
+        for data in self.clients:
+            text.insert(
+                tk.END,
+                f"Nom: {data['name']}, Email: {data['email']}\n"
+            )
+
+    def room_data_updater(self, text: tk.Text) -> None:
+        """ Updates the data in the application. """
+        text.delete(1.0, tk.END)  # Clear the text widget before updating
+        try:
+            # Assuming that a list of clients already exists
+            self.rooms = list_rooms() 
+        except FileNotFoundError:
+            text.insert(tk.END, "Aucune salle enregistré.\n")
+
+        for data in self.rooms:
+            text.insert(
+                tk.END,
+                f"Nom: {data['name']}, type: {data['type']}, Capaciter: {data['capacity']}\n"
+            )
+        
+    def combobox_updater(self, combobox: ttk.Combobox, default:str, data:dict) -> None:
+        """ Updates the dropdown menu with the list of clients. """
+        data_values = list(map(lambda x : x['name'], data))
+        combobox.config(values=data_values)
+        combobox.set(default)
+
+        
+        
+
+
+
+    def add_client(self, surname: str, name: str, email_address: str) -> bool:
+        if not surname or not name or not email_address:
+            return "Erreur: Tous les champs doivent être remplis."
+        add_client(name, surname, email_address)
+        return True
 
     def add_room(self, name_room, room_capacity, room_type):
         if not name_room:
             return "Erreur: Le nom de la salle doit être renseigné."
 
-        self.rooms_id = len(self.rooms) + 1
-        self.rooms[self.rooms_id] = add_room(name_room, room_capacity, room_type)
+        add_room(name_room, room_capacity, room_type)
         return True
 
     def reserve_room(self, client_id, room_id, date, Hour_of_meeting):
@@ -123,6 +165,45 @@ class Main_Window:
     def show_reservable_rooms(self, date_begin, date_end):
         pass
 
+
+    def main_screen_ui(self, window):
+        """ Creates the main screen UI with buttons to navigate to other functionalities. """
+        self.frame = ttk.Frame(window)
+        background_image(self.frame)
+
+        self.button_add = ttk.Button(self.frame, text="Ajouter", command=self.go_to_add_client_ui)
+        self.button_add.config(width=50, padding=10)
+        self.button_add.grid(row=3, column=0, columnspan=2, padx=200, pady=50)
+
+        self.button_add = ttk.Button(self.frame, text="Réservation", command=self.go_to_reservation_ui)
+        self.button_add.config(width=50, padding=10)
+        self.button_add.grid(row=5, column=0, columnspan=2, padx=200, pady=50)
+
+        self.button_add = ttk.Button(self.frame, text="Afficher", command=self.go_to_show_ui)
+        self.button_add.config(width=50, padding=10)
+        self.button_add.grid(row=7, column=0, columnspan=2, padx=200, pady=50)
+
+        return self.frame
+
+    def go_to_reservation_ui(self):
+        """ Switches to the 'Réserver' tab in the notebook. """
+        self.window.select(self.frame_reservation)
+        self.frame_reservation.tkraise()
+
+    def go_to_add_client_ui(self):
+        """ Switches to the 'Ajouter' tab in the notebook. """
+        self.window.select(self.frame_add_client)
+        self.frame_add_client.tkraise()
+
+    def go_to_show_ui(self):
+        """ Switches to the 'Afficher' tab in the notebook. """
+        self.window.select(self.frame_show_reservation)
+        self.frame_show_reservation.tkraise()
+
+    def go_to_main_ui(self):
+        """ Switches to the 'Accueil' tab in the notebook. """
+        self.window.select(self.frame_main)
+        self.frame_main.tkraise()
 
     def add_client_ui(self, window):
         self.frame = ttk.Frame(window)
@@ -145,16 +226,22 @@ class Main_Window:
             name = self.entry_name.get()
             email = self.entry_email.get()
             try: 
-                (result, self.client_id, self.clients) = add_client_gui(surname, name, email, self.client_id, self.clients)
+                result = self.add_client(surname, name, email)
                 if result is True:
-                    messagebox.showinfo("Succès", "Client ajouté avec succès!")
+                # Update the client data
+                 self.client_data_updater(self.text_client)
+                 self.combobox_updater(self.combobox_clients, self.default_client, self.clients)
+                 messagebox.showinfo("Succès", "Client ajouté avec succès!")
                 else:
                     messagebox.showerror("Erreur", result)
             except ValueError as e:
                 messagebox.showerror("Erreur", str(e))
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
-        self.button_validate.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.button_validate.grid(row=3, column=3, columnspan=2, padx=10, pady=10)
+
+        self.button_cancel = ttk.Button(self.frame, text="Annuler", command=self.go_to_main_ui)
+        self.button_cancel.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
         return self.frame
 
@@ -171,11 +258,11 @@ class Main_Window:
         self.entry_room_capacity = ttk.Entry(self.frame)
         self.entry_room_capacity.grid(row=1, column=1, padx=10, pady=10)
 
-        # Create an OptionMenu for room type selection
-        self.entry_room_type = tk.StringVar(window)
-        self.entry_room_type.set(self.room_types[0]) # default value
+        # Create an Combobox for room type selection
         ttk.Label(self.frame, text="Type de la salle:").grid(row=2, column=0, padx=10, pady=10)
-        self.drop_down_menu = ttk.OptionMenu(self.frame, self.entry_room_type, *self.room_types).grid(row=2, column=1, padx=10, pady=10)
+        self.entry_room_type = ttk.Combobox(self.frame, values=self.room_types, state='readonly')
+        self.entry_room_type.grid(row=2, column=1, padx=10, pady=10)
+        self.entry_room_type.set("type de salle")  # Set a default value
 
 
         def validate():
@@ -184,12 +271,18 @@ class Main_Window:
             room_type = self.entry_room_type.get()
             result = self.add_room(room_name, room_capacity, room_type)
             if result is True:
+                # Update the room data
+                self.room_data_updater(self.text_room)
+                self.combobox_updater(self.combobox_rooms, self.default_room, self.rooms)
                 messagebox.showinfo("Succès", "Salle ajoutée avec succès!")
             else:
                 messagebox.showerror("Erreur", result)
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
-        self.button_validate.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.button_validate.grid(row=3, column=3, columnspan=2, padx=10, pady=10)
+
+        self.button_cancel = ttk.Button(self.frame, text="Annuler", command=self.go_to_main_ui)
+        self.button_cancel.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
         return self.frame
 
@@ -198,34 +291,37 @@ class Main_Window:
         self.frame = ttk.Frame(window)
         background_image(self.frame)
 
-        # Create an OptionMenu for room type selection
-        self.entry_client_id = tk.StringVar(window)
-        self.entry_room_id = tk.StringVar(window)
+        # Create an Combobox for client selection
+        ttk.Label(self.frame, text="Client:").grid(row=0, column=0, padx=10, pady=10)
         if not self.clients:
             # If no clients are registered, set a default value
-            self.entry_client_id.set("pas de client enregistré")  # default value that for some reason isn't displayed
-            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
-            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, "pas de client enregistrer").grid(row=0, column=1, padx=10, pady=10)
+            self.default_no_client = "pas de client enregistré"  # default value
+            self.combobox_clients = ttk.Combobox(self.frame, values="", state='readonly')
+            self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
+            self.combobox_clients.set(self.default_no_client)
         else:
             # If clients are registered, populate the dropdown with client names
-            self.default =("choisie un nom")
             self.client_name = list(map(lambda x : x['name'], self.clients))
-            self.entry_client_id.set(self.default) # default value that for some reason isn't displayed
-            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
-            self.drop_down_menu_clients = ttk.OptionMenu(self.frame, self.entry_client_id, self.default, *self.client_name).grid(row=0, column=1, padx=10, pady=10)
+            self.default_client = "Sélectionner un client"
+            ttk.Label(self.frame, text="Client:").grid(row=0, column=0, padx=10, pady=10)
+            self.combobox_clients = ttk.Combobox(self.frame, values=self.client_name, state='readonly')
+            self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
+            self.combobox_clients.set(self.default_client)
 
+        # Create an Combobox for room selection
+        ttk.Label(self.frame, text="Salle:").grid(row=0, column=0, padx=10, pady=10)
         if not self.rooms:
             # If no clients are registered, set a default value
-            self.entry_room_id.set("pas de salle enregistré")  # default value that for some reason isn't displayed
-            ttk.Label(self.frame, text="Client id:").grid(row=0, column=0, padx=10, pady=10)
-            self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, "pas de salle enregistré").grid(row=0, column=1, padx=10, pady=10)
+            self.default_no_room = "pas de salle enregistré"  # default value
+            self.combobox_rooms = ttk.Combobox(self.frame, values="", state='readonly')
+            self.combobox_rooms.grid(row=1, column=1, padx=10, pady=10)
+            self.combobox_clients.set(self.default_no_room)
         else:
-            # Create an OptionMenu for room type selection
-            self.default_room =("choisie une salles")
+            self.default_room = "Sélectionner une salle"
             self.room_name = list(map(lambda x : x['name'], self.rooms))
-            self.entry_room_id.set(self.default_room) # default value that for some reason isn't displayed
-            ttk.Label(self.frame, text="Salle id:").grid(row=1, column=0, padx=10, pady=10)
-            self.drop_down_menu_rooms = ttk.OptionMenu(self.frame, self.entry_room_id, self.default_room, *self.room_name).grid(row=1, column=1, padx=10, pady=10)
+            self.combobox_rooms = ttk.Combobox(self.frame, values=self.room_name, state='readonly')
+            self.combobox_rooms.grid(row=1, column=1, padx=10, pady=10)
+            self.combobox_rooms.set(self.default_room)
 
         ttk.Label(self.frame, text="Date:").grid(row=2, column=0, padx=10, pady=10)
         self.entry_date = ttk.Entry(self.frame)
@@ -262,12 +358,16 @@ class Main_Window:
             hours.append(self.entry_minute_end.get()) 
             result = self.reserve_room(date, hours, room_name, client_name)
             if result is True:
+                self.data_updater()
                 messagebox.showinfo("Succès", "Salle réservée avec succès!")
             else:
                 messagebox.showerror("Erreur", result)
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
-        self.button_validate.grid(row=5, column=1, columnspan=2, padx=10, pady=10)
+        self.button_validate.grid(row=5, column=3, columnspan=2, padx=10, pady=10)
+
+        self.button_cancel = ttk.Button(self.frame, text="Annuler", command=self.go_to_main_ui)
+        self.button_cancel.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
 
         return self.frame
 
@@ -276,18 +376,9 @@ class Main_Window:
         self.frame = ttk.Frame(window)
         background_image(self.frame)
 
-        self.room_list = self.rooms
-        self.text = tk.Text(self.frame)
-        self.text.insert(
-            tk.END,
-            "\n".join(
-                [
-                    f"Nom: {self.room['name']}, Type: {self.room['type']}, Capacité: {self.room['capacity']}"
-                    for self.id, self.room in enumerate(self.rooms, start=1)
-                ]
-            ),
-        )
-        self.text.pack(padx=10, pady=10)
+        self.text_room = tk.Text(self.frame)
+        self.room_data_updater(self.text_room)
+        self.text_room.pack(padx=10, pady=10)
 
         return self.frame
 
@@ -296,18 +387,10 @@ class Main_Window:
         self.frame = ttk.Frame(window)
         background_image(self.frame)
 
-        self.clients_list = self.clients
-        self.text = tk.Text(self.frame)
-        self.text.insert(
-            tk.END,
-            "\n".join(
-                [
-                    f"Nom: {self.client['name']}, Email: {self.client['email']}"
-                    for self.id, self.client in enumerate(self.clients, start=1)
-                ]
-            ),
-        )
-        self.text.pack(padx=10, pady=10)
+        self.text_client = tk.Text(self.frame)
+        # Insert the client data into the text widget
+        self.client_data_updater(self.text_client)
+        self.text_client.pack(padx=10, pady=10)
 
         return self.frame
 
@@ -316,20 +399,17 @@ class Main_Window:
         self.frame = ttk.Frame(window)
         background_image(self.frame)
 
-        self.date_begin = "2025-10-01"  
-        self.date_fin = "2023-10-02"
-        self.salles_disponibles = self.show_reservable_rooms(self.date_begin, self.date_fin)
-        self.text = tk.Text(self.frame)
-        self.text.insert(
+        self.text_reserve = tk.Text(self.frame)
+        self.text_reserve.insert(
             tk.END,
             "\n".join(
                 [
                     f"Nom: {self.room['name']}, Type: {self.room['type']}, Capacité: {self.room['capacity']}"
-                    for self.id, self.room in enumerate(self.rooms, start=1)
+                    for self.id, self.room in enumerate(self.rooms)
                 ]
             ),
         )
-        self.text.pack(padx=10, pady=10)
+        self.text_reserve.pack(padx=10, pady=10)
 
         return self.frame
    

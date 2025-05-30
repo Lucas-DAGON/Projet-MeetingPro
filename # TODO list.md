@@ -1,7 +1,8 @@
 # TODO
-- [ ] afficher boutons accueil
+- [X] afficher boutons accueil
 - [X] Affichage messages d'erreur
-- [ ] boutons annuler
+- [X] boutons annuler
+- [X] update dropdown & listings
 - [ ] systeme de recherche client
 - [ ] Verifier si retour durée
 - [ ] lister en fonction du type de salle
