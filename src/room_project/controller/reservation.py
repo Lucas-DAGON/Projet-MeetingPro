@@ -10,10 +10,10 @@
 #################################################################
 
 # Import necessary modules
-from src.person_logic.person import Person
-from src.room_logic.standard import Standard
-from src.room_logic.conference import Conference
-from src.room_logic.computer import ComputerRoom
+from ..person_logic.person import Person
+from ..room_logic.standard import Standard
+from ..room_logic.conference import Conference
+from ..room_logic.computer import ComputerRoom
 
 
 def reserve_room(date: str, bloc: list, room, person: Person) -> bool:

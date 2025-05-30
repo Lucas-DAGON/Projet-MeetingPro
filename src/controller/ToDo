@@ -1,6 +1,0 @@
- - verify list_reservations
- - verify verify_open_rooms
- - verify add_client
- - verify add_room
- - verify list_client
- - verify reservation

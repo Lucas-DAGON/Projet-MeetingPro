@@ -10,7 +10,7 @@
 #################################################################
 
 # Imports
-import src.person_logic.person as person
+from ..person_logic import person
 
 
 def list_reservations(person: person.Person):
