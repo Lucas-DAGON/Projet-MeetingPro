@@ -1,3 +1,10 @@
+#################################################################
+# -*- coding: utf-8 -*-
+#################################################################
+# Project: MeetingPro
+# File: test_person.py
+#################################################################
+
 import pytest
 from room_project.person_logic.person import Person
 import os

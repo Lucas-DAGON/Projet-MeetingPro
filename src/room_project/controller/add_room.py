@@ -32,5 +32,7 @@ def add_room(name, capacity, type):
     elif type == "Computer Room":
         room = ComputerRoom(name=name, capacity=capacity)
     else:
-        raise ValueError("Type must be standard, conference or computer")
+        raise ValueError(
+            "Type must be standard, conference or computer"
+        )  # This line is redundant due to the previous check, but kept for clarity.
     return room

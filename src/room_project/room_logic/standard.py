@@ -87,6 +87,11 @@ class Standard:
         # extract the date and times from the bloc dictionary
         date = list(bloc.keys())[0]
         times = bloc[date]
+        # check if the times are in the correct format
+        if len(times) != 4:
+            raise ValueError(
+                "The reservation times must be a list with 4 entries: [start_hour, start_minute, end_hour, end_minute]."
+            )
         # add the reservation to the reservations dictionary
         if date not in self.reservations:
             self.reservations[date] = []

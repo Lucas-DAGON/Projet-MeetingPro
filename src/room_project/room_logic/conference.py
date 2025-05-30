@@ -21,7 +21,9 @@ class Conference(Standard):
         :param name: Name of the meeting room.
         :param capacity: Maximum capacity of the meeting room.
         """
-        super().__init__(name, capacity)
+        super().__init__(
+            name, capacity, {}
+        )  # Add {} because of some tests which showed can retain older reservations -- Don't know why
         self.name = name
         self.capacity = capacity
 
