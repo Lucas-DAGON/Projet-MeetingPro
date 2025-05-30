@@ -26,7 +26,7 @@ def reserve_room(date: str, bloc: list, room, person: Person) -> bool:
     :return: True if ended properly
     """
     # Check if the duration of the bloc is valid
-    if room.reservation_duration_valid(
+    if not room.reservation_duration_valid(
         duration=(bloc[2] - bloc[0]) * 60 + (bloc[3] - bloc[1])
     ):
         raise ValueError("The duration of the reservation must be at least 30 minutes.")
