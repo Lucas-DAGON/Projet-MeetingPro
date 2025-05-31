@@ -263,8 +263,8 @@ class Main_Window:
             room_name = self.entry_room_name.get()
             room_capacity = int(self.entry_room_capacity.get())
             room_type = self.entry_room_type.get()
-            result = self.add_room(room_name, room_capacity, room_type)
             try:
+                result = self.add_room(room_name, room_capacity, room_type)
                 if result is True:
                     # Update the room data
                     self.room_data_updater(self.text_room)
@@ -412,7 +412,7 @@ class Main_Window:
                 self.filtered_client.update(name)
             client_object = return_person_obj(self.filtered_client['id'])
 
-            for name in [x for x in self.clients if x['name'] == self.combobox_rooms.get()]:
+            for name in [x for x in self.rooms if x['name'] == self.combobox_rooms.get()]:
                 self.filtered_room.update(name)
             
             room_object = return_room_object(self.combobox_rooms.get(), self.room_type_button.get())
