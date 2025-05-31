@@ -11,7 +11,7 @@
 
 import tkinter as tk
 from PIL import Image, ImageTk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Entry
 from .bg_image import background_image
 from ..controller.add_room import add_room
 from ..controller.reservation import reserve_room
@@ -273,7 +273,7 @@ class Main_Window:
             if result is True:
                 # Update the room data
                 self.room_data_updater(self.text_room)
-                self.combobox_updater(self.combobox_rooms, self.default_room:str, self.rooms)
+                self.combobox_updater(self.combobox_rooms, self.default_room, self.rooms)
                 messagebox.showinfo("Succès", "Salle ajoutée avec succès!")
             else:
                 messagebox.showerror("Erreur", result)
@@ -285,6 +285,43 @@ class Main_Window:
         self.button_cancel.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
         return self.frame
+
+
+
+    # Function for checking the
+    # key pressed and updating
+    # the listbox
+    def checkkey(self, event):
+
+        value = event.widget.get()
+        print(value)
+
+        # get data from l
+        if value == '':
+            data = self.clients
+        else:
+            data = []
+            for item in self.client_name:
+                if value.lower() in item.lower():
+                    data.append(item)                
+    
+        # update data in listbox
+        self.update(data)
+    
+    
+    def update(self, data):
+
+        # clear previous data
+        self.listbox_clients.delete(0, 'end')
+    
+        # put new data
+        for item in data:
+            self.listbox_clients.insert('end', item)
+    
+        # put new data
+        self.combobox_clients.config(values=data)
+        self.combobox_clients.set(self.default_client)
+
 
 
     def reservation_room_ui(self, window):
@@ -304,9 +341,18 @@ class Main_Window:
             self.client_name = list(map(lambda x : x['name'], self.clients))
             self.default_client:str = "Sélectionner un client"
             ttk.Label(self.frame, text="Client:").grid(row=0, column=0, padx=10, pady=10)
-            self.combobox_clients = ttk.Combobox(self.frame, values=self.client_name, state='readonly')
-            self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
-            self.combobox_clients.set(self.default_client)
+            #self.combobox_clients = ttk.Combobox(self.frame, values=self.client_name, state='readonly')
+            self.entry_client = Entry(self.frame)
+            self.entry_client.grid(row=0, column=1, padx=10, pady=10)
+            self.entry_client.bind("<KeyRelease>", self.checkkey)
+
+            self.listbox_clients = tk.Listbox(self.frame)
+            self.combobox_clients = ttk.Combobox(self.frame, state='readonly')
+            self.combobox_clients.grid(row=0, column=11, padx=10, pady=10)
+            self.listbox_clients.grid(row=0, column=10, padx=10, pady=10)
+            self.update(self.client_name)
+            #self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
+            #self.combobox_clients.set(self.default_client)
 
         # Create an Combobox for room selection
         ttk.Label(self.frame, text="Salle:").grid(row=1, column=0, padx=10, pady=10)
@@ -348,8 +394,8 @@ class Main_Window:
         ttk.Label(self.frame, text="min").grid(row=4, column=4, padx=10, pady=10)
 
         def validate():
-            client_name = self.entry_client_id.get()
-            room_name = self.entry_room_id.get()
+            client_name = self.entry_client.get()
+            room_name = self.combobox_rooms.get()
             date = self.entry_date.get()
             hours:list = []
             hours.append(self.entry_hour_begin.get())
@@ -358,7 +404,6 @@ class Main_Window:
             hours.append(self.entry_minute_end.get()) 
             result = self.reserve_room(date, hours, room_name, client_name)
             if result is True:
-                self.data_updater()
                 messagebox.showinfo("Succès", "Salle réservée avec succès!")
             else:
                 messagebox.showerror("Erreur", result)
