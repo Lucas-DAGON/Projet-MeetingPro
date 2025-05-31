@@ -382,6 +382,7 @@ class Main_Window:
 
         # Date of the meeting
         ttk.Label(self.frame, text="Date:").grid(row=2, column=0, padx=10, pady=10)
+        ttk.Label(self.frame, text="La date doit être au format jj-mm-aaaa").grid(row=2, column=2, padx=10, pady=10)
         self.entry_date = ttk.Entry(self.frame)
         self.entry_date.grid(row=2, column=1, padx=10, pady=10)
 
