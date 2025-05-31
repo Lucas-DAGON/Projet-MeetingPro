@@ -30,10 +30,12 @@ class Main_Window:
     clients:dict = {}
     rooms:dict = {}
     reservations:dict = {}
-    fullscreenstate:bool = False
     room_types:list = ["Standard", "Conference Room", "Computer Room"]
-    client_id:int = 0
-    room_id:int = 0
+    room_type:list = []
+    room_name:list = []
+    filtered_room_name = []
+    room_capacity:list = []
+    room_reservation:list = []
     
     def __init__(self, master):
         master.title("MeetingPro")
@@ -45,9 +47,6 @@ class Main_Window:
             self.rooms = list_rooms()  
         except FileNotFoundError:
             pass  # If the file does not exist, we will start with empty lists
-
-        self.client_id = len(self.clients)
-        self.room_id = len(self.rooms)
 
         self.window = ttk.Notebook(master)
         self.window.pack(pady=10, expand=True, fill="both")
@@ -291,14 +290,16 @@ class Main_Window:
     # Function for checking the
     # key pressed and updating
     # the listbox
+    # Code adapted from the original snippet below:
+    # https://www.geeksforgeeks.org/autocmplete-combobox-in-python-tkinter/
     def checkkey(self, event):
+        """ Checks the key pressed and updates the combobox with the matching clients. """
 
         value = event.widget.get()
-        print(value)
 
         # get data from l
-        if value == '':
-            data = self.clients
+        if not value:
+            data = []
         else:
             data = []
             for item in self.client_name:
@@ -310,19 +311,28 @@ class Main_Window:
     
     
     def update(self, data):
-
-        # clear previous data
-        self.listbox_clients.delete(0, 'end')
-    
-        # put new data
-        for item in data:
-            self.listbox_clients.insert('end', item)
-    
-        # put new data
-        self.combobox_clients.config(values=data)
-        self.combobox_clients.set(self.default_client)
+        """ Updates the combobox with the new data. """
+        # if no data is found, set the default value
+        if not data:
+            self.client_name = list(map(lambda x : x['name'], self.clients))
+            self.combobox_clients.config(values=self.client_name)
+        else :
+            # put new data
+            self.combobox_clients.config(values=data)
 
 
+    def room_type_update(self):
+        """ Updates the room combobox based on the selected room tupe. """
+        self.filtered_room_name.clear()
+
+        for name in [x for x in self.rooms if x['type'] == self.room_type_button.get()]:
+            self.filtered_room_name.append(name)
+        
+        self.room_name = list(map(lambda x : x['name'], self.filtered_room_name))
+        self.combobox_rooms.config(values=self.room_name)
+        self.combobox_rooms.set(self.default_room)
+
+        
 
     def reservation_room_ui(self, window):
         self.frame = ttk.Frame(window)
@@ -341,18 +351,10 @@ class Main_Window:
             self.client_name = list(map(lambda x : x['name'], self.clients))
             self.default_client:str = "Sélectionner un client"
             ttk.Label(self.frame, text="Client:").grid(row=0, column=0, padx=10, pady=10)
-            #self.combobox_clients = ttk.Combobox(self.frame, values=self.client_name, state='readonly')
-            self.entry_client = Entry(self.frame)
-            self.entry_client.grid(row=0, column=1, padx=10, pady=10)
-            self.entry_client.bind("<KeyRelease>", self.checkkey)
-
-            self.listbox_clients = tk.Listbox(self.frame)
-            self.combobox_clients = ttk.Combobox(self.frame, state='readonly')
-            self.combobox_clients.grid(row=0, column=11, padx=10, pady=10)
-            self.listbox_clients.grid(row=0, column=10, padx=10, pady=10)
+            self.combobox_clients = ttk.Combobox(self.frame)
+            self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
+            self.combobox_clients.bind("<KeyRelease>", self.checkkey)
             self.update(self.client_name)
-            #self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
-            #self.combobox_clients.set(self.default_client)
 
         # Create an Combobox for room selection
         ttk.Label(self.frame, text="Salle:").grid(row=1, column=0, padx=10, pady=10)
@@ -369,6 +371,16 @@ class Main_Window:
             self.combobox_rooms.grid(row=1, column=1, padx=10, pady=10)
             self.combobox_rooms.set(self.default_room)
 
+            self.room_type_button = tk.StringVar()
+            self.radiobutton_standard = ttk.Radiobutton(self.frame, text="Standard", variable=self.room_type_button, value="Standard", command=self.room_type_update)
+            self.radiobutton_standard.grid(row=1, column=2, padx=10, pady=10)
+            self.radiobutton_standard.invoke()  # Set the default selection to "Standard"
+            self.radiobutton_conference = ttk.Radiobutton(self.frame, text="Salle de conférence", variable=self.room_type_button, value="Conference Room", command=self.room_type_update)
+            self.radiobutton_conference.grid(row=1, column=3, padx=10, pady=10)
+            self.radiobutton_computer = ttk.Radiobutton(self.frame, text="Salle informatique", variable=self.room_type_button, value="Computer Room", command=self.room_type_update)
+            self.radiobutton_computer.grid(row=1, column=4, padx=10, pady=10)
+
+        # Date of the meeting
         ttk.Label(self.frame, text="Date:").grid(row=2, column=0, padx=10, pady=10)
         self.entry_date = ttk.Entry(self.frame)
         self.entry_date.grid(row=2, column=1, padx=10, pady=10)
