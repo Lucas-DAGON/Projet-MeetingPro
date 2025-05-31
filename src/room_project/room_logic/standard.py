@@ -10,7 +10,7 @@
 #################################################################
 
 # Import necessary modules
-from json import dumps, load
+from json import dumps, load, JSONDecodeError
 from os import path
 from pathlib import Path
 import logging
@@ -181,9 +181,15 @@ class Standard:
 
         with open(file_path, "r") as f:
             room_data = load(f)  # Load the JSON data
-            return cls(
-                room_data["name"], room_data["capacity"], room_data["reservations"]
-            )
+            try:
+                room = cls.__new__(cls)  # Create an instance without calling __init__
+                room.name = room_data["name"]
+                room.capacity = room_data["capacity"]
+                room.reservations = room_data["reservations"]
+                room.file_path = file_path
+                return room
+            except JSONDecodeError:
+                raise ValueError("Problem by creating a room by its file")
 
 
 if __name__ == "__main__":
