@@ -19,6 +19,8 @@ from ..controller.list_client import list_clients
 from ..controller.list_rooms import list_rooms
 from ..controller.list_reservations import list_reservations
 from ..controller.add_client import add_client
+from ..controller.return_room_obj import return_room_object
+from ..controller.return_person_obj import return_person_obj
 
 
 
@@ -34,8 +36,11 @@ class Main_Window:
     room_type:list = []
     room_name:list = []
     filtered_room_name = []
+    filtered_client = {}
+    filtered_room = {}
     room_capacity:list = []
     room_reservation:list = []
+    hours = []
     
     def __init__(self, master):
         master.title("MeetingPro")
@@ -104,12 +109,11 @@ class Main_Window:
             text.insert(tk.END, "Aucun client enregistré.\n")
         
         self.clients = list_clients()
+        temp_clients:dict = self.clients.copy()
+        for item in temp_clients:
+            item.pop('id', None)
 
-        for data in self.clients:
-            text.insert(
-                tk.END,
-                f"Nom: {data['name']}, Email: {data['email']}\n"
-            )
+        self.printTable(temp_clients, sep=' ', text = text)
 
     def room_data_updater(self, text: tk.Text) -> None:
         """ Updates the data in the application. """
@@ -120,11 +124,7 @@ class Main_Window:
         except FileNotFoundError:
             text.insert(tk.END, "Aucune salle enregistré.\n")
 
-        for data in self.rooms:
-            text.insert(
-                tk.END,
-                f"Nom: {data['name']}, type: {data['type']}, Capaciter: {data['capacity']}\n"
-            )
+        self.printTable(self.rooms, sep=' ', text = text)
         
     def combobox_updater(self, combobox: ttk.Combobox, default:str, data:dict) -> None:
         """ Updates the dropdown menu with the list of clients. """
@@ -151,13 +151,7 @@ class Main_Window:
         return True
 
     def reserve_room(self, client_id, room_id, date, Hour_of_meeting):
-        if client_id not in self.clients:
-            return "Erreur: Client non trouvé."
-        if room_id not in self.rooms:
-            return "Erreur: Salle non trouvée."
-        if not self.rooms[room_id]["Disponible"]:
-            return "Erreur: Salle non disponible."
-
+        """ Reserves a room for a given date and time slot. """
         self.reservations = reserve_room(date, Hour_of_meeting, room_id, client_id)
         return True
 
@@ -231,6 +225,7 @@ class Main_Window:
                  self.client_data_updater(self.text_client)
                  self.combobox_updater(self.combobox_clients, self.default_client, self.clients)
                  messagebox.showinfo("Succès", "Client ajouté avec succès!")
+                 self.go_to_main_ui()
                 else:
                     messagebox.showerror("Erreur", result)
             except ValueError as e:
@@ -269,13 +264,17 @@ class Main_Window:
             room_capacity = int(self.entry_room_capacity.get())
             room_type = self.entry_room_type.get()
             result = self.add_room(room_name, room_capacity, room_type)
-            if result is True:
-                # Update the room data
-                self.room_data_updater(self.text_room)
-                self.combobox_updater(self.combobox_rooms, self.default_room, self.rooms)
-                messagebox.showinfo("Succès", "Salle ajoutée avec succès!")
-            else:
-                messagebox.showerror("Erreur", result)
+            try:
+                if result is True:
+                    # Update the room data
+                    self.room_data_updater(self.text_room)
+                    self.combobox_updater(self.combobox_rooms, self.default_room, self.rooms)
+                    messagebox.showinfo("Succès", "Salle ajoutée avec succès!")
+                    self.go_to_main_ui()
+                else:
+                    messagebox.showerror("Erreur", result)
+            except ValueError as e:
+                messagebox.showerror("Erreur", str(e))
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
         self.button_validate.grid(row=3, column=3, columnspan=2, padx=10, pady=10)
@@ -382,6 +381,7 @@ class Main_Window:
 
         # Date of the meeting
         ttk.Label(self.frame, text="Date:").grid(row=2, column=0, padx=10, pady=10)
+        ttk.Label(self.frame, text="La date doit être au format jj-mm-aaaa").grid(row=2, column=2, padx=10, pady=10)
         self.entry_date = ttk.Entry(self.frame)
         self.entry_date.grid(row=2, column=1, padx=10, pady=10)
 
@@ -406,19 +406,33 @@ class Main_Window:
         ttk.Label(self.frame, text="min").grid(row=4, column=4, padx=10, pady=10)
 
         def validate():
-            client_name = self.entry_client.get()
-            room_name = self.combobox_rooms.get()
+            # Put the selected client in a dictionary
+            self.clients = list_clients()
+            for name in [x for x in self.clients if x['name'] == self.combobox_clients.get()]:
+                self.filtered_client.update(name)
+            client_object = return_person_obj(self.filtered_client['id'])
+
+            for name in [x for x in self.clients if x['name'] == self.combobox_rooms.get()]:
+                self.filtered_room.update(name)
+            
+            room_object = return_room_object(self.combobox_rooms.get(), self.room_type_button.get())
+
             date = self.entry_date.get()
-            hours:list = []
-            hours.append(self.entry_hour_begin.get())
-            hours.append(self.entry_minute_begin.get())
-            hours.append(self.entry_hour_end.get()) 
-            hours.append(self.entry_minute_end.get()) 
-            result = self.reserve_room(date, hours, room_name, client_name)
-            if result is True:
-                messagebox.showinfo("Succès", "Salle réservée avec succès!")
-            else:
-                messagebox.showerror("Erreur", result)
+            
+            self.hours.clear()
+            self.hours.append(int(self.entry_hour_begin.get()))
+            self.hours.append(int(self.entry_minute_begin.get()))
+            self.hours.append(int(self.entry_hour_end.get()))
+            self.hours.append(int(self.entry_minute_end.get()))
+            print(self.hours)
+            try:
+                result = reserve_room(date, self.hours, room_object, client_object)
+                if result is True:
+                    messagebox.showinfo("Succès", "Salle réservée avec succès!")
+                else:
+                    messagebox.showerror("Erreur", result)
+            except ValueError as e:
+                messagebox.showerror("Erreur", str(e))
 
         self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
         self.button_validate.grid(row=5, column=3, columnspan=2, padx=10, pady=10)
@@ -428,6 +442,26 @@ class Main_Window:
 
         return self.frame
 
+    def printTable(self, myDict, colList=None, sep='\uFFFA', text:tk.Text=None):
+        """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
+        If column names (colList) aren't specified, they will show in random order.
+        sep: row separator. Ex: sep='\n' on Linux. Default: dummy to not split line.
+        Author: Thierry Husson - Use it as you want but don't blame me.
+        """
+        if not colList: colList = list(myDict[0].keys() if myDict else [])
+        myList = [colList] # 1st row = header
+        for item in myDict: myList.append([str(item[col] or '') for col in colList])
+        colSize = [max(map(len,(sep.join(col)).split(sep))) for col in zip(*myList)]
+        formatStr = ' | '.join(["{{:<{}}}".format(i) for i in colSize])
+        line = formatStr.replace(' | ','-+-').format(*['-' * i for i in colSize])
+        item=myList.pop(0); lineDone=False
+        while myList or any(item):
+           if all(not i for i in item):
+              item=myList.pop(0)
+              if line and (sep!='\uFFFA' or not lineDone): text.insert(tk.END, line + '\n'); lineDone=True
+           row = [i.split(sep,1) for i in item]
+           text.insert(tk.END, formatStr.format(*[i[0] for i in row])+ '\n')
+           item = [i[1] if len(i)>1 else '' for i in row]
 
     def show_room_ui(self, window):
         self.frame = ttk.Frame(window)

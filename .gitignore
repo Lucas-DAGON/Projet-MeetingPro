@@ -207,3 +207,9 @@ test.py
 # json files
 persons/*.json
 room/*.json
+
+# pyinstaller
+build
+dist
+.spec
+.vscode
