@@ -91,7 +91,9 @@ class Person:
                 if not check_overlap_lists(
                     block, reservation_data[list(reservation_data.keys())[0]][0]
                 ):
-                    self.reservations.append(reservation_data)
+                    date = list(reservation_data.keys())[0]
+                    value = reservation_data[date]
+                    self.reservations[date].append(value)
                     logger.debug("Réservation ajoutée : %s", reservation_data)
                     break
             else:
@@ -226,6 +228,9 @@ class Person:
             person.name = f"{person.firstname} {person.sirname}"
             person.reservations = data.get("reservations", [])
             person.id = data.get("id")
+            person.file_path = path.join(
+            Path(__file__).parent.parent.parent, "persons", f"{person.id}.json"
+        )
             return person
         except JSONDecodeError:
             raise ValueError("Invalid JSON data")
