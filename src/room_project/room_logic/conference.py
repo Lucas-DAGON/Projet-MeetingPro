@@ -10,7 +10,7 @@
 #################################################################
 
 # Import necessary modules
-from .standard import Standard
+from room_project.room_logic.standard import Standard
 
 
 class Conference(Standard):
