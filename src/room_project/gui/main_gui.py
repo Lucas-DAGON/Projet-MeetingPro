@@ -9,9 +9,9 @@
 # Description: This script creates the main window.
 ###########################################################################################
 
+#Import necessary librairies
 import tkinter as tk
-from PIL import Image, ImageTk
-from tkinter import ttk, messagebox, Entry
+from tkinter import ttk, messagebox
 from .bg_image import background_image
 from ..controller.add_room import add_room
 from ..controller.reservation import reserve_room
@@ -21,6 +21,10 @@ from ..controller.list_reservations import list_reservations
 from ..controller.add_client import add_client
 from ..controller.return_room_obj import return_room_object
 from ..controller.return_person_obj import return_person_obj
+from ..controller.duration import get_duration
+from ..controller.verify_open_rooms import verify_open_rooms
+
+###########################################################################################
 
 
 
@@ -41,8 +45,12 @@ class Main_Window:
     room_capacity:list = []
     room_reservation:list = []
     hours = []
+    #filtered_room_in_type = {}
+
     
     def __init__(self, master):
+        """ Initializes the main window and sets up the UI. """
+        # Set the title of the main window
         master.title("MeetingPro")
         self.master = master
 
@@ -90,7 +98,9 @@ class Main_Window:
 
         self.tab_show.add(self.show_room_ui(self.tab_show), text="Afficher les salles")
         self.tab_show.add(self.show_client_ui(self.tab_show), text="Afficher les clients")
-        self.tab_show.add(self.is_room_reservable_ui(self.tab_show),text="Afficher les salles disponibles")
+        self.tab_show.add(self.show_client_reservation_ui(self.tab_show),text="Afficher les réservations du clients")
+
+        self.tab_show.add(self.show_if_room_reservable_ui(self.tab_show),text="Afficher les salles disponibles")
 
         # Add "Accueil" tab
         self.tab_main = ttk.Notebook(self.frame_main)
@@ -101,30 +111,35 @@ class Main_Window:
 
     def client_data_updater(self, text: tk.Text) -> None:
         """ Updates the data in the application. """
+        text.config(state='normal')
         text.delete(1.0, tk.END)  # Clear the text widget before updating
         try:
             # Assuming that a list of clients already exists
             self.clients = list_clients() 
         except FileNotFoundError:
             text.insert(tk.END, "Aucun client enregistré.\n")
+            text.config(state='disabled')
         
         self.clients = list_clients()
         temp_clients:dict = self.clients.copy()
         for item in temp_clients:
             item.pop('id', None)
-
         self.printTable(temp_clients, sep=' ', text = text)
+        text.config(state='disabled')
 
     def room_data_updater(self, text: tk.Text) -> None:
         """ Updates the data in the application. """
+        text.config(state='normal')
         text.delete(1.0, tk.END)  # Clear the text widget before updating
         try:
             # Assuming that a list of clients already exists
             self.rooms = list_rooms() 
         except FileNotFoundError:
             text.insert(tk.END, "Aucune salle enregistré.\n")
+            text.config(state='disabled')
 
         self.printTable(self.rooms, sep=' ', text = text)
+        text.config(state='disabled')
         
     def combobox_updater(self, combobox: ttk.Combobox, default:str, data:dict) -> None:
         """ Updates the dropdown menu with the list of clients. """
@@ -138,12 +153,14 @@ class Main_Window:
 
 
     def add_client(self, surname: str, name: str, email_address: str) -> bool:
+        """ Adds a client to the application. """
         if not surname or not name or not email_address:
             return "Erreur: Tous les champs doivent être remplis."
         add_client(name, surname, email_address)
         return True
 
     def add_room(self, name_room, room_capacity, room_type):
+        """ Adds a room to the application. """
         if not name_room:
             return "Erreur: Le nom de la salle doit être renseigné."
 
@@ -155,8 +172,10 @@ class Main_Window:
         self.reservations = reserve_room(date, Hour_of_meeting, room_id, client_id)
         return True
 
-    def show_reservable_rooms(self, date_begin, date_end):
-        pass
+    def get_meeting_time(self, hour:list) -> str:
+        """ Returns the duration of a meeting in a human-readable format. """
+        meeting_time = get_duration(hour)
+        return meeting_time
 
 
     def main_screen_ui(self, window):
@@ -424,7 +443,6 @@ class Main_Window:
             self.hours.append(int(self.entry_minute_begin.get()))
             self.hours.append(int(self.entry_hour_end.get()))
             self.hours.append(int(self.entry_minute_end.get()))
-            print(self.hours)
             try:
                 result = reserve_room(date, self.hours, room_object, client_object)
                 if result is True:
@@ -442,7 +460,7 @@ class Main_Window:
 
         return self.frame
 
-    def printTable(self, myDict, colList=None, sep='\uFFFA', text:tk.Text=None):
+    def printTable(self, myDict, colList=None, sep='\uFFFA', text:tk.Text=None) -> str:
         """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
         If column names (colList) aren't specified, they will show in random order.
         sep: row separator. Ex: sep='\n' on Linux. Default: dummy to not split line.
@@ -481,31 +499,140 @@ class Main_Window:
         self.text_client = tk.Text(self.frame)
         # Insert the client data into the text widget
         self.client_data_updater(self.text_client)
+        self.text_client.config(state='disabled')
         self.text_client.pack(padx=10, pady=10)
 
         return self.frame
 
 
-    def is_room_reservable_ui(self, window):
+
+    def show_client_reservation_ui(self, window):
         self.frame = ttk.Frame(window)
         background_image(self.frame)
 
-        self.text_reserve = tk.Text(self.frame)
-        self.text_reserve.insert(
-            tk.END,
-            "\n".join(
-                [
-                    f"Nom: {self.room['name']}, Type: {self.room['type']}, Capacité: {self.room['capacity']}"
-                    for self.id, self.room in enumerate(self.rooms)
-                ]
-            ),
-        )
-        self.text_reserve.pack(padx=10, pady=10)
+        self.text_client_reservation = tk.Text(self.frame, state='disabled')
+        self.text_client_reservation.grid(row=0, column=2, padx=10, pady=10)
+        self.combobox_clients = ttk.Combobox(self.frame)
+        self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
+        self.combobox_clients.bind("<KeyRelease>", self.checkkey)
+        self.update(self.client_name)
+
+
+        def validate():
+            # Put the selected client in a dictionary
+            try:
+                self.clients = list_clients()
+            except FileNotFoundError:
+                self.text_client_reservation.config(state='normal')
+                self.text_client_reservation.delete(1.0, tk.END)  # Clear the text widget before updating
+                self.text_client_reservation.insert(tk.END, "Aucun client enregistré.\n")
+                self.text_client_reservation.config(state='disabled')
+                return
+
+
+            for name in [x for x in self.clients if x['name'] == self.combobox_clients.get()]:
+                self.filtered_client.update(name)
+            client_object = return_person_obj(self.filtered_client['id'])
+
+
+            try:
+                # Get the reservations for the specified client
+                result = list_reservations(client_object)
+                if result is not None:
+                    self.text_client_reservation.config(state='normal')
+                    self.printTable(result, sep=' ', text=self.text_client_reservation)
+                    self.text_client_reservation.config(state='disabled')
+                else:
+                    messagebox.showerror("Erreur", result)
+            except ValueError as e:
+                messagebox.showerror("Erreur", str(e))
+                
+
+
+        self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
+        self.button_validate.grid(row=5, column=3, columnspan=2, padx=10, pady=10)
+
+        self.button_cancel = ttk.Button(self.frame, text="Retour au menu principal", command=self.go_to_main_ui)
+        self.button_cancel.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
 
         return self.frame
    
 
+    def show_if_room_reservable_ui(self, window):
+        self.frame = ttk.Frame(window)
+        background_image(self.frame)
 
+        self.text_room_reservable = tk.Text(self.frame, state='disabled')
+        self.text_room_reservable.grid(row=7, column=2, padx=10, pady=10)
+
+
+        # Beginning Date of the meeting
+        ttk.Label(self.frame, text="Date de début:").grid(row=2, column=0, padx=10, pady=10)
+        ttk.Label(self.frame, text="La date doit être au format jj-mm-aaaa").grid(row=2, column=2, padx=10, pady=10)
+        self.entry_date_begin = ttk.Entry(self.frame)
+        self.entry_date_begin.grid(row=2, column=1, padx=10, pady=10)
+
+        # Beginning time of the meeting
+        ttk.Label(self.frame, text="heure de début:").grid(row=4, column=0, padx=10, pady=10)
+        self.entry_hour_begin = ttk.Entry(self.frame)
+        self.entry_hour_begin.grid(row=4, column=1, padx=10, pady=10)
+        ttk.Label(self.frame, text="h").grid(row=4, column=2, padx=10, pady=10)
+
+        self.entry_minute_begin = ttk.Entry(self.frame)
+        self.entry_minute_begin.grid(row=4, column=3, padx=10, pady=10)
+        ttk.Label(self.frame, text="min").grid(row=4, column=4, padx=10, pady=10)
+
+        # End of the meeting
+        ttk.Label(self.frame, text="heure de fin:").grid(row=5, column=0, padx=10, pady=10)
+        self.entry_hour_end = ttk.Entry(self.frame)
+        self.entry_hour_end.grid(row=5, column=1, padx=10, pady=10)
+        ttk.Label(self.frame, text="h").grid(row=5, column=2, padx=10, pady=10)
+
+        self.entry_minute_end = ttk.Entry(self.frame)
+        self.entry_minute_end.grid(row=5, column=3, padx=10, pady=10)
+        ttk.Label(self.frame, text="min").grid(row=5, column=4, padx=10, pady=10)
+
+        # Type of room selection
+        def validate():
+            # Get the date and time inputs
+            date_begin = self.entry_date_begin.get()
+            self.hours.clear()
+            self.hours.append(int(self.entry_hour_begin.get()))
+            self.hours.append(int(self.entry_minute_begin.get()))
+            self.hours.append(int(self.entry_hour_end.get()))
+            self.hours.append(int(self.entry_minute_end.get()))
+            bloc = {
+                date_begin: [
+                [
+                    self.entry_hour_begin.get(),
+                    self.entry_minute_begin.get(),  # Start time
+                    self.entry_hour_end.get(),
+                    self.entry_minute_end.get(),
+                ],  # End time
+        ]
+    }
+            try:
+                meeting_time = get_duration(self.hours)
+
+                # Check if the room is reservable
+                result = verify_open_rooms(bloc)
+                if result is not None:
+                    self.text_room_reservable.config(state='normal')
+                    self.text_room_reservable.delete(1.0, tk.END)
+                    self.printTable(result, sep=' ', text=self.text_room_reservable)
+                    self.text_room_reservable.config(state='disabled')
+            except ValueError as e:
+                self.text_room_reservable.config(state='normal')
+                self.text_room_reservable.delete(1.0, tk.END)  # Clear the text widget before updating
+                self.text_room_reservable.insert(tk.END, "Pas de salles disponibles pour cette période.")
+                self.text_room_reservable.config(state='disabled')
+        self.button_validate = ttk.Button(self.frame, text="Valider", command=validate)
+        self.button_validate.grid(row=8, column=3, columnspan=2, padx=10, pady=10)
+
+        self.button_cancel = ttk.Button(self.frame, text="Retour au menu principal", command=self.go_to_main_ui)
+        self.button_cancel.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+
+        return self.frame
 
 def main(): 
     root = tk.Tk()
