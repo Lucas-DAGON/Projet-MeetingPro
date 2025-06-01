@@ -22,5 +22,13 @@ def list_reservations(person: person.Person):
     # Get the list of reservations from the person object
     reservations = person.get_reservations()
 
+    reservations_to_return = []  # changed by Matthieu
+
+    for date in list(reservations.keys()):
+        for info in reservations[date]:
+            reservations_to_return.append(
+                {"date": date, "time": info[0], "room": info[1]}
+            )
+
     # Return the list of reservations
-    return reservations
+    return reservations_to_return

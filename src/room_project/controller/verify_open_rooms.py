@@ -65,13 +65,12 @@ def overlap(list1, list2):
 
 
 # fucntion to create a list of the rooms available for the given time slot
-def verify_open_rooms(type: str, bloc: dict) -> list:
+def verify_open_rooms(bloc: dict) -> list:
     """
-    :param type: type of the room (Standard, Conference Room, Computer Room)
     :param bloc: dictionary containing a single entry where the single key is the day and
      its associated value is a list containing the start and end time of the time slot in
      the format [hh:mm, hh:mm]
-    :return: list of the rooms available for the given time slot
+    :return: list of the rooms available for the given time slot in dict form
     """
     # extracting the start and end time of the time slot
     # and the day of the week
@@ -86,16 +85,18 @@ def verify_open_rooms(type: str, bloc: dict) -> list:
             route = os.path.join(ROOMS_DIR, file)
             with open(route, "r") as f:
                 room = json.load(f)
-                type_room = room.get("type", {})
-                # check if the room is of the same type as the one requested
-                if type_room != type:
-                    continue
                 # check if the room is available for the given time slot
                 reservations = room.get("reservations", [])
                 logging.debug(f"Reservations for {file}: {reservations}")
                 # check if the room is available for the given time slot
                 if date not in reservations:
-                    free.append(file.replace(".json", ""))
+                    free.append(
+                        {
+                            "name": room["name"],
+                            "capacity": room["capacity"],
+                            "type": room["type"],
+                        }
+                    )  # return now a list of dict
                     logging.debug(f"Room {file} is free for {date}")
                 else:
                     logging.debug(f"Reservations for {file} on {date}: {reservations}")
@@ -105,12 +106,20 @@ def verify_open_rooms(type: str, bloc: dict) -> list:
                             logging.debug(f"Room {file} is not free for {date}")
                             break
                     else:
-                        free.append(file.replace(".json", ""))
+                        free.append(
+                            {
+                                "name": room["name"],
+                                "capacity": room["capacity"],
+                                "type": room["type"],
+                            }
+                        )  # return now a list of dict
                         logging.debug(
                             f"Room {file} is free for {date} after checking reservations"
                         )
     return free
 
+
+# name capacity type
 
 # Example usage
 if __name__ == "__main__":
@@ -125,8 +134,6 @@ if __name__ == "__main__":
             ],  # End time
         ]
     }
-    # Example of a type
-    type = "Standard"
     # Call the function
-    available_rooms = verify_open_rooms(type, bloc)
+    available_rooms = verify_open_rooms(bloc)
     print(available_rooms)
