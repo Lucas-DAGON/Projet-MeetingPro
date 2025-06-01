@@ -45,6 +45,7 @@ class Main_Window:
     room_capacity:list = []
     room_reservation:list = []
     hours = []
+    client_name:list = []
 
     
     def __init__(self, master):
