@@ -17,7 +17,7 @@ def list_reservations(person: person.Person):
     """
     Function to list all reservations of a person.
     :param person: Person object whose reservations are to be listed
-    :return: List of reservations
+    :return: List of reservations in dict form
     """
     # Get the list of reservations from the person object
     reservations = person.get_reservations()

@@ -55,7 +55,7 @@ def overlap(list1, list2):
     start1, end1 = check_overlap(start1, end1)
     start2, end2 = check_overlap(start2, end2)
 
-    # Vérify if the two time intervals overlap
+    # VÃ©rify if the two time intervals overlap
     # Two intervals [start1, end1] and [start2, end2] overlap if:
     # max(start1, start2) < min(end1, end2)
     # This means that the start of one interval is before the end of the other interval
