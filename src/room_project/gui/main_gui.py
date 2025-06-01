@@ -45,7 +45,7 @@ class Main_Window:
     room_capacity:list = []
     room_reservation:list = []
     hours = []
-    #filtered_room_in_type = {}
+    client_name:list = []
 
     
     def __init__(self, master):
@@ -338,6 +338,34 @@ class Main_Window:
             # put new data
             self.combobox_clients.config(values=data)
 
+    def checkkey_show(self, event):
+        """ Checks the key pressed and updates the combobox with the matching clients. """
+
+        value = event.widget.get()
+
+        # get data from l
+        if not value:
+            data = []
+        else:
+            data = []
+            for item in self.client_name:
+                if value.lower() in item.lower():
+                    data.append(item)                
+    
+        # update data in listbox
+        self.update_show(data)
+    
+    
+    def update_show(self, data):
+        """ Updates the combobox with the new data. """
+        # if no data is found, set the default value
+        if not data:
+            self.client_name = list(map(lambda x : x['name'], self.clients))
+            self.combobox_clients_show.config(values=self.client_name)
+        else :
+            # put new data
+            self.combobox_clients_show.config(values=data)
+
 
     def room_type_update(self):
         """ Updates the room combobox based on the selected room tupe. """
@@ -512,10 +540,10 @@ class Main_Window:
 
         self.text_client_reservation = tk.Text(self.frame, state='disabled')
         self.text_client_reservation.grid(row=0, column=2, padx=10, pady=10)
-        self.combobox_clients = ttk.Combobox(self.frame)
-        self.combobox_clients.grid(row=0, column=1, padx=10, pady=10)
-        self.combobox_clients.bind("<KeyRelease>", self.checkkey)
-        self.update(self.client_name)
+        self.combobox_clients_show = ttk.Combobox(self.frame)
+        self.combobox_clients_show.grid(row=0, column=1, padx=10, pady=10)
+        self.combobox_clients_show.bind("<KeyRelease>", self.checkkey_show)
+        self.update_show(self.client_name)
 
 
         def validate():
@@ -530,7 +558,7 @@ class Main_Window:
                 return
 
 
-            for name in [x for x in self.clients if x['name'] == self.combobox_clients.get()]:
+            for name in [x for x in self.clients if x['name'] == self.combobox_clients_show.get()]:
                 self.filtered_client.update(name)
             client_object = return_person_obj(self.filtered_client['id'])
 
